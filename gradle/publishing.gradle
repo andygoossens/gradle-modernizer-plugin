@@ -1,0 +1,49 @@
+apply plugin: 'maven'
+// Not using 'maven-publish' plugin as it still cannot sign artifacts. Without it we cannot upload to Maven Central.
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+//            repository(url: mavenLocal().url)
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'Gradle Modernizer plugin'
+                packaging 'jar'
+                description 'Gradle plugin for detecting use of legacy APIs which modern Java versions supersede.'
+                url 'https://github.com/andygoossens/gradle-modernizer-plugin'
+                inceptionYear '2016'
+
+                scm {
+                    connection 'scm:git:git://github.com/andygoossens/gradle-modernizer-plugin.git'
+                    developerConnection 'scm:git:ssh://github.com/andygoossens/gradle-modernizer-plugin.git'
+                    url 'https://github.com/andygoossens/gradle-modernizer-plugin'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'andygoossens'
+                        name 'Andy Goossens'
+                        email 'andygoossens+modernizer@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+}
