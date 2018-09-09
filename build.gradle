@@ -1,8 +1,20 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.ajoberstar:gradle-git:1.7.1"
+    }
+}
+
 apply plugin: 'groovy'
 apply plugin: 'java'
+apply plugin: 'org.ajoberstar.release-opinion'
 apply from: "$rootDir/gradle/additional-artifacts.gradle"
-apply from: "$rootDir/gradle/signing.gradle"
+apply from: "$rootDir/gradle/release.gradle"
 apply from: "$rootDir/gradle/publishing.gradle"
+apply from: "$rootDir/gradle/signing.gradle"
 
 group = 'com.github.andygoossens'
 version = '1.0.0'
@@ -21,6 +33,16 @@ dependencies {
 ext.compatibilityVersion = '1.7'
 sourceCompatibility = compatibilityVersion
 targetCompatibility = compatibilityVersion
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Modernizer plugin',
+                'Implementation-Version': version,
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version'),
+                'Built-Gradle': gradle.gradleVersion
+    }
+}
 
 wrapper {
     gradleVersion = '4.10'

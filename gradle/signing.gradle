@@ -1,11 +1,5 @@
 apply plugin: 'signing'
 
 signing {
-    sign configurations.archives
-}
-
-signArchives {
-    onlyIf {
-        gradle.taskGraph.hasTask(uploadArchives)
-    }
+    sign publishing.publications.mavenJava
 }
