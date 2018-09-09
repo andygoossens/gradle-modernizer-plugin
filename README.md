@@ -132,6 +132,7 @@ The table below describes how they relate to each other.
 | Gradle Modernizer Plugin | Modernizer Maven Plugin |
 |--------------------------|-------------------------|
 | 1.0.x                    | 1.6.0                   |
+| 1.1.x                    | 1.6.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
 Specify in the `toolVersion` extension property the version that you want to use. But pay attention:
