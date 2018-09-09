@@ -22,6 +22,7 @@ ext.compatibilityVersion = '1.7'
 sourceCompatibility = compatibilityVersion
 targetCompatibility = compatibilityVersion
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.0'
+wrapper {
+    gradleVersion = '4.10'
+    distributionType = Wrapper.DistributionType.ALL
 }
