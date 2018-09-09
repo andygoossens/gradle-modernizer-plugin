@@ -1,6 +1,6 @@
 /*
- * Copyright 2014 the original author or authors.
- * Copyright 2016 Andy Goossens
+ * Copyright 2016-2018 Andy Goossens
+ * Copyright 2014-2018 Andrew Gaul
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package com.github.andygoossens.gradle.plugins
 
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Internal
+
+import static java.util.Collections.emptyList
 
 class ModernizerPluginExtension {
 
@@ -44,8 +46,27 @@ class ModernizerPluginExtension {
 
     /**
      * User-specified violation file. Also disables standard violation checks.
+     * Can point to files from classpath using an absolute path, e.g.:
+     *
+     * classpath:/modernizer.xml
+     *
+     * for the default violations file.
      */
-    String violationsFile = null
+    String violationsFile = "classpath:/modernizer.xml"
+
+    /**
+     * User-specified violation files. The violations loaded from
+     * violationsFiles override the ones specified in violationsFile (or the
+     * default violations file if no violationsFile is given). Violations from
+     * the latter files override violations from the former files.
+     *
+     * Can point to files from classpath using an absolute path, e.g.:
+     *
+     * classpath:/modernizer.xml
+     *
+     * for the default violations file.
+     */
+    List<String> violationsFiles = emptyList()
 
     /**
      * Disables user-specified violations. This is a text file with one
@@ -56,18 +77,31 @@ class ModernizerPluginExtension {
     String exclusionsFile = null
 
     /**
+     * Log level to emit violations at, e.g., error, warn, info, debug, trace.
+     */
+    String violationLogLevel = "warn"
+
+    /**
      * Violations to disable. Each exclusion should be in the javap format:
      *
      * java/lang/String.getBytes:(Ljava/lang/String;)[B.
      */
-    Set<String> exclusions = new HashSet<String>();
+    Set<String> exclusions = new HashSet<String>()
+
+    /**
+     * Violation patterns to disable. Each exclusion should be a
+     * regular expression that matches the javap format:
+     *
+     * java/lang/.*
+     */
+    Set<String> exclusionPatterns = new HashSet<String>()
 
     /**
      * Package prefixes to ignore, specified using &lt;ignorePackage&gt; child
      * elements. Specifying foo.bar subsequently ignores foo.bar.*,
      * foo.bar.baz.* and so on.
      */
-    Set<String> ignorePackages = new HashSet<String>();
+    Set<String> ignorePackages = new HashSet<String>()
 
     /**
      * Skips the plugin execution.

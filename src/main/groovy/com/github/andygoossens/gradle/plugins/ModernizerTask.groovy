@@ -1,6 +1,6 @@
 /*
- * Copyright 2014-2015 Andrew Gaul
- * Copyright 2016 Andy Goossens
+ * Copyright 2016-2018 Andy Goossens
+ * Copyright 2014-2018 Andrew Gaul
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,24 @@
 package com.github.andygoossens.gradle.plugins
 
 import com.github.andygoossens.gradle.plugins.utils.StreamUtils
-import groovy.util.logging.Log
+import groovy.util.logging.Slf4j
 import org.gaul.modernizer_maven_plugin.Violation
 import org.gradle.api.GradleException
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
 import org.xml.sax.SAXException
 
 import javax.xml.parsers.ParserConfigurationException
+import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
 
-@Log
+import static java.lang.String.format
+
+@Slf4j
 class ModernizerTask extends AbstractModernizerTask {
+
+    private static final String CLASSPATH_PREFIX = "classpath:"
 
     Project project
     ModernizerPluginExtension extension
@@ -43,86 +50,124 @@ class ModernizerTask extends AbstractModernizerTask {
 
         def modernizerClass = threadContextClassLoader.loadClass("org.gaul.modernizer_maven_plugin.Modernizer")
 
-        Map<String, Violation> violations
-        InputStream is
-        if (extension.violationsFile == null) {
-            is = modernizerClass.getResourceAsStream('/modernizer.xml')
-        } else {
-            File file = new File(extension.violationsFile)
-            try {
-                is = new FileInputStream(file)
-            } catch (FileNotFoundException fnfe) {
-                throw new GradleScriptException("Error opening violation file: $file", fnfe);
-            }
-        }
-        try {
-            violations = modernizerClass.parseFromXml(is);
-        } catch (IOException ioe) {
-            throw new GradleScriptException("Error reading violation data", ioe);
-        } catch (ParserConfigurationException pce) {
-            throw new GradleScriptException("Error parsing violation data", pce);
-        } catch (SAXException saxe) {
-            throw new GradleScriptException("Error parsing violation data", saxe);
-        } finally {
-            StreamUtils.closeQuietly(is)
+        Map<String, Violation> allViolations = parseViolations(modernizerClass, extension.violationsFile)
+        for (String violationsFilePath : extension.violationsFiles) {
+            allViolations.putAll(parseViolations(modernizerClass, violationsFilePath))
         }
 
-        Set<String> allExclusions = new HashSet<String>();
-        allExclusions.addAll(extension.exclusions);
+        Set<String> allExclusions = new HashSet<String>()
+        allExclusions.addAll(extension.exclusions)
         if (extension.exclusionsFile != null) {
-            is = null;
-            try {
-                File file = new File(extension.exclusionsFile);
-                if (file.exists()) {
-                    is = new FileInputStream(file);
-                } else {
-                    is = this.getClass().getClassLoader().getResourceAsStream(extension.exclusionsFile);
-                }
-                if (is == null) {
-                    throw new GradleException("Could not find exclusion file: $extension.exclusionsFile");
-                }
+            allExclusions.addAll(readExclusionsFile(extension.exclusionsFile))
+        }
 
-                allExclusions.addAll(StreamUtils.readAllLines(is));
-            } catch (IOException ioe) {
-                throw new GradleScriptException("Error reading exclusion file: $extension.exclusionsFile", ioe);
-            } finally {
-                StreamUtils.closeQuietly(is);
+        Set<Pattern> allExclusionPatterns = new HashSet<Pattern>()
+        for (String pattern : extension.exclusionPatterns) {
+            try {
+                allExclusionPatterns.add(Pattern.compile(pattern))
+            } catch (PatternSyntaxException pse) {
+                throw new GradleScriptException(
+                        "Invalid exclusion pattern", pse)
             }
         }
 
-        modernizer = modernizerClass.newInstance(extension.javaVersion, violations, allExclusions, extension.ignorePackages)
+        modernizer = modernizerClass.newInstance(extension.javaVersion, allViolations, allExclusions,
+                allExclusionPatterns, extension.ignorePackages)
 
         try {
-            long count = recurseFiles(project.sourceSets.main.output.classesDir);
+            long count = recurseFileCollection(project.sourceSets.main.output.classesDirs)
             if (extension.includeTestClasses) {
-                count += recurseFiles(project.sourceSets.test.output.classesDir);
+                count += recurseFileCollection(project.sourceSets.test.output.classesDirs)
             }
             if (extension.failOnViolations && count != 0) {
-                throw new GradleException("Found $count violations");
+                throw new GradleException("Found $count violations")
             }
         } catch (IOException ioe) {
-            throw new GradleScriptException("Error reading Java classes", ioe);
+            throw new GradleScriptException("Error reading Java classes", ioe)
         }
     }
 
+    private Map<String, Violation> parseViolations(Class modernizerClass, String violationsFilePath) {
+        InputStream is
+        if (violationsFilePath.startsWith(CLASSPATH_PREFIX)) {
+            String classpath =
+                    violationsFilePath.substring(CLASSPATH_PREFIX.length())
+            if (!classpath.startsWith("/")) {
+                throw new IllegalArgumentException(format(
+                        "Only absolute classpath references are allowed, got [%s]",
+                        classpath))
+            }
+            is = modernizerClass.getResourceAsStream(classpath)
+        } else {
+            File file = new File(violationsFilePath)
+            try {
+                is = new FileInputStream(file)
+            } catch (FileNotFoundException fnfe) {
+                throw new GradleScriptException("Error opening violation file: $file", fnfe)
+            }
+        }
+        try {
+            return modernizerClass.parseFromXml(is)
+        } catch (IOException ioe) {
+            throw new GradleScriptException("Error reading violation data", ioe)
+        } catch (ParserConfigurationException pce) {
+            throw new GradleScriptException("Error parsing violation data", pce)
+        } catch (SAXException saxe) {
+            throw new GradleScriptException("Error parsing violation data", saxe)
+        } finally {
+            StreamUtils.closeQuietly(is)
+        }
+    }
+
+    private Collection<String> readExclusionsFile(String exclusionsFilePath) {
+        InputStream is = null
+        try {
+            File file = new File(exclusionsFilePath)
+            if (file.exists()) {
+                is = new FileInputStream(exclusionsFilePath)
+            } else {
+                is = this.getClass().getClassLoader().getResourceAsStream(
+                        exclusionsFilePath)
+            }
+            if (is == null) {
+                throw new GradleException("Could not find exclusion file: $extension.exclusionsFile")
+            }
+
+            return StreamUtils.readAllLines(is)
+        } catch (IOException ioe) {
+            throw new GradleScriptException("Error reading exclusion file: $extension.exclusionsFile", ioe)
+        } finally {
+            StreamUtils.closeQuietly(is)
+        }
+    }
+
+    private long recurseFileCollection(FileCollection fileCollection) throws IOException {
+        long count = 0
+        for (File file : fileCollection.asList()) {
+            count += recurseFiles(file)
+        }
+        
+        return count
+    }
+
     private long recurseFiles(File file) throws IOException {
-        long count = 0;
+        long count = 0
         if (!file.exists()) {
-            return count;
+            return count
         }
         if (file.isDirectory()) {
-            String[] children = file.list();
+            String[] children = file.list()
             if (children != null) {
                 for (String child : children) {
-                    count += recurseFiles(new File(file, child));
+                    count += recurseFiles(new File(file, child))
                 }
             }
         } else if (file.getPath().endsWith(".class")) {
-            InputStream is = new FileInputStream(file);
+            InputStream is = new FileInputStream(file)
             try {
-                Collection occurrences = modernizer.check(is);
+                Collection occurrences = modernizer.check(is)
                 for (def occurrence : occurrences) {
-                    String name = file.getPath();
+                    String name = file.getPath()
                     // Commented out until there is a better way for doing this.
                     //
                     // Known issues:
@@ -140,13 +185,30 @@ class ModernizerTask extends AbstractModernizerTask {
 //                        name = testSourceDirectory.getPath() + name.substring(testOutputDirectory.getPath().length());
 //                        name = name.substring(0, name.length() - ".class".length()) + ".java";
 //                    }
-                    log.warning("$name:${occurrence.lineNumber}: ${occurrence.violation.comment}");
-                    ++count;
+                    emitViolation(name, occurrence)
+                    ++count
                 }
             } finally {
-                StreamUtils.closeQuietly(is);
+                StreamUtils.closeQuietly(is)
             }
         }
-        return count;
+        return count
+    }
+
+    private emitViolation(String name, occurrence) {
+        def message = "$name:${occurrence.lineNumber}: ${occurrence.violation.comment}"
+        if ("error".equals(extension.violationLogLevel)) {
+            log.error(message)
+        } else if ("trace".equals(extension.violationLogLevel)) {
+            log.trace(message)
+        } else if ("warn".equals(extension.violationLogLevel)) {
+            log.warn(message)
+        } else if ("info".equals(extension.violationLogLevel)) {
+            log.info(message)
+        } else if ("debug".equals(extension.violationLogLevel)) {
+            log.debug(message)
+        } else {
+            throw new IllegalStateException("unexpected log level, was: " + extension.violationLogLevel)
+        }
     }
 }

@@ -1,3 +1,3 @@
-### Version 0.1 (August 19, 2016)
+### Version 1.0.0 (September 9, 2018)
 
 * Initial release.

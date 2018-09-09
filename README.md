@@ -28,7 +28,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.github.andygoossens:gradle-modernizer-plugin:0.0.1'
+        classpath 'com.github.andygoossens:gradle-modernizer-plugin:1.0.0'
     }
 }
 
@@ -50,17 +50,19 @@ whenever it is deemed necessary.
 
 ### Extension properties
 
-| Property name    | Type   | Default value                | Description                                                     |
-|------------------|--------|------------------------------|-----------------------------------------------------------------|
-|toolVersion       |String  |See table below               |Version of modernizer-maven-plugin that will be used.            |
-|javaVersion       |String  |${project.targetCompatibility}|Target Java version. Decides which violations will apply.        |
-|failOnViolations  |boolean |false                         |Fail build when a violation has been detected.                   |
-|includeTestClasses|boolean |false                         |Whether test classes will be searched for violations.            |
-|violationsFile    |String  |null                          |User-specified violation file.                                   |
-|exclusionsFile    |String  |null                          |Disables user-specified violations. See format description below.|
-|exclusions        |String[]|[]                            |Violations to disable. See format description below.             |
-|ignorePackages    |String[]|[]                            |Package prefixes to ignore. See format description below.        |
-|skip              |boolean |false                         |Whether task should be skipped.                                  |
+| Property name    | Type   | Default value                | Description                                                                    |
+|------------------|--------|------------------------------|--------------------------------------------------------------------------------|
+|toolVersion       |String  |See table below               |Version of modernizer-maven-plugin that will be used.                           |
+|javaVersion       |String  |${project.targetCompatibility}|Target Java version. Decides which violations will apply.                       |
+|failOnViolations  |boolean |false                         |Fail build when a violation has been detected.                                  |
+|includeTestClasses|boolean |false                         |Whether test classes will be searched for violations.                           |
+|violationsFile    |String  |null                          |User-specified violation file. Overrides standard violation checks.             |
+|violationsFiles   |String[]|[]                            |User-specified violation files. Overrides `violationsFile` and standard checks. |
+|exclusionsFile    |String  |null                          |Disables user-specified violations. See format description below.               |
+|exclusions        |String[]|[]                            |Violations to disable. See format description below.                            |
+|exclusionPatterns |String[]|[]                            |Violation patterns to disable. See format description below.                    |
+|ignorePackages    |String[]|[]                            |Package prefixes to ignore. See format description below.                       |
+|skip              |boolean |false                         |Whether task should be skipped.                                                 |
 
 #### Usage example
 
@@ -97,6 +99,17 @@ exclusions = [
 ]
 ```
 
+##### exclusionPatterns
+
+This is a list of exclusion patterns. Each exclusion should be a regular expression that matches the javap format.
+
+Example:
+```groovy
+exclusionPatterns = [
+        'java/lang/.*',
+]
+```
+
 ##### ignorePackages
 
 This is a list of package prefixes for which no violations will be reported.
@@ -118,7 +131,7 @@ The table below describes how they relate to each other.
 
 | Gradle Modernizer Plugin | Modernizer Maven Plugin |
 |--------------------------|-------------------------|
-| 1.0.0                    | 1.4.0                   |
+| 1.0.0                    | 1.6.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
 Specify in the `toolVersion` extension property the version that you want to use. But pay attention:
@@ -156,12 +169,12 @@ However if it requires changes in Modernizer Maven Plugin, then it is up to its 
 
 ```
 Licensed under the Apache License, Version 2.0
-Copyright (C) 2016 Andy Goossens
+Copyright (C) 2016-2018 Andy Goossens
 
 Inspired by, and based upon code from:
 
 Modernizer Maven Plugin
-Copyright (C) 2014-2015 Andrew Gaul
+Copyright (C) 2014-2018 Andrew Gaul
 
 Gradle Docker plugin
 Copyright (C) 2014 the original author or authors.
