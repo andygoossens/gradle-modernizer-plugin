@@ -51,3 +51,26 @@ publishing {
         }
     }
 }
+
+gradlePlugin {
+    plugins {
+        modernizerPlugin {
+            id = 'com.github.andygoossens'
+            implementationClass = 'com.github.andygoossens.gradle.plugins.ModernizerPlugin'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/andygoossens/gradle-modernizer-plugin'
+    vcsUrl = 'https://github.com/andygoossens/gradle-modernizer-plugin'
+    description = 'Detects use of legacy APIs which modern Java versions supersede.'
+    tags = ['java', 'static analysis', 'code quality']
+
+    plugins {
+        modernizerPlugin {
+            // id is captured from java-gradle-plugin configuration
+            displayName = 'Gradle Modernizer plugin'
+        }
+    }
+}

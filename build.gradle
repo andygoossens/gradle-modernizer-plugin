@@ -6,6 +6,8 @@ buildscript {
 
 plugins {
     id 'org.ajoberstar.reckon' version '0.8.0'
+    id 'com.gradle.plugin-publish' version '0.10.0'
+    id 'java-gradle-plugin'
 }
 
 apply plugin: 'groovy'

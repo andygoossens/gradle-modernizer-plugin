@@ -20,6 +20,7 @@ import com.github.andygoossens.gradle.plugins.utils.ThreadContextClassLoader
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 
@@ -32,6 +33,7 @@ abstract class AbstractModernizerTask extends DefaultTask {
     @Optional
     FileCollection classpath
 
+    @Internal
     ThreadContextClassLoader threadContextClassLoader
 
     @TaskAction

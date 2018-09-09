@@ -17,6 +17,7 @@
 package com.github.andygoossens.gradle.plugins
 
 import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 
 import static java.util.Collections.emptyList
@@ -29,6 +30,7 @@ class ModernizerPluginExtension {
     /**
      * The version of modernizer-maven-plugin to be used.
      */
+    @Input
     String toolVersion = null
 
     /**
@@ -36,12 +38,15 @@ class ModernizerPluginExtension {
      * Modernizer will detect uses of Vector as violations when targeting Java
      * 1.2 but not when targeting Java 1.1.
      */
+    @Input
     String javaVersion = null
 
     /** Fail task if Modernizer detects any violations. */
+    @Input
     boolean failOnViolations = false
 
     /** Run Modernizer on test classes. */
+    @Input
     boolean includeTestClasses = false
 
     /**
@@ -52,6 +57,7 @@ class ModernizerPluginExtension {
      *
      * for the default violations file.
      */
+    @Input
     String violationsFile = "classpath:/modernizer.xml"
 
     /**
@@ -66,6 +72,7 @@ class ModernizerPluginExtension {
      *
      * for the default violations file.
      */
+    @Input
     List<String> violationsFiles = emptyList()
 
     /**
@@ -74,11 +81,13 @@ class ModernizerPluginExtension {
      *
      * java/lang/String.getBytes:(Ljava/lang/String;)[B.
      */
+    @Input
     String exclusionsFile = null
 
     /**
      * Log level to emit violations at, e.g., error, warn, info, debug, trace.
      */
+    @Input
     String violationLogLevel = "warn"
 
     /**
@@ -86,6 +95,7 @@ class ModernizerPluginExtension {
      *
      * java/lang/String.getBytes:(Ljava/lang/String;)[B.
      */
+    @Input
     Set<String> exclusions = new HashSet<String>()
 
     /**
@@ -94,6 +104,7 @@ class ModernizerPluginExtension {
      *
      * java/lang/.*
      */
+    @Input
     Set<String> exclusionPatterns = new HashSet<String>()
 
     /**
@@ -101,10 +112,12 @@ class ModernizerPluginExtension {
      * elements. Specifying foo.bar subsequently ignores foo.bar.*,
      * foo.bar.baz.* and so on.
      */
+    @Input
     Set<String> ignorePackages = new HashSet<String>()
 
     /**
      * Skips the plugin execution.
      */
+    @Input
     boolean skip = false
 }

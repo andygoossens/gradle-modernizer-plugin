@@ -23,6 +23,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Internal
 import org.xml.sax.SAXException
 
 import javax.xml.parsers.ParserConfigurationException
@@ -36,7 +37,10 @@ class ModernizerTask extends AbstractModernizerTask {
 
     private static final String CLASSPATH_PREFIX = "classpath:"
 
+    @Internal
     Project project
+    
+    @Internal
     ModernizerPluginExtension extension
 
     private def modernizer
