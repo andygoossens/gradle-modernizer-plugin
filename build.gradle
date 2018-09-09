@@ -5,7 +5,6 @@ buildscript {
 }
 
 plugins {
-    id 'org.ajoberstar.reckon' version '0.8.0'
     id 'com.gradle.plugin-publish' version '0.10.0'
     id 'java-gradle-plugin'
 }
@@ -13,11 +12,11 @@ plugins {
 apply plugin: 'groovy'
 apply plugin: 'java'
 apply from: "$rootDir/gradle/additional-artifacts.gradle"
-apply from: "$rootDir/gradle/release.gradle"
 apply from: "$rootDir/gradle/publishing.gradle"
 apply from: "$rootDir/gradle/signing.gradle"
 
 group = 'com.github.andygoossens'
+version = '1.2.0-SNAPSHOT'
 
 repositories {
     mavenCentral()

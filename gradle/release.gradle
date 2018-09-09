@@ -1,4 +1,0 @@
-reckon {
-    scopeFromProp()
-    snapshotFromProp()
-}
