@@ -22,20 +22,17 @@ so that the same functionality is now available in Gradle builds.
 To use the plugin, include in your build script:
 
 ```groovy
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.github.andygoossens:gradle-modernizer-plugin:1.0.0'
-    }
+// You need to do this only once
+plugins {
+    id "com.github.andygoossens.gradle-modernizer-plugin" version "1.1.1"
 }
 
+// Option 1: Apply the plugin in each project where you want to use it
 apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
 
-repositories {
-    mavenCentral()
+// Option 2: Apply the plugin in all projects
+allprojects {
+    apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
 }
 ```
 

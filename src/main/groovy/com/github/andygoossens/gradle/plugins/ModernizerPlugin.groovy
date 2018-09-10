@@ -59,7 +59,6 @@ class ModernizerPlugin implements Plugin<Project> {
     private static ModernizerPluginExtension createExtension(Project project) {
         ModernizerPluginExtension extension = project.extensions.create(EXTENSION_NAME, ModernizerPluginExtension)
         extension.setToolVersion(MODERNIZER_DEFAULT_VERSION)
-        extension.setJavaVersion(project.targetCompatibility.toString())
 
         extension
     }
@@ -96,15 +95,18 @@ class ModernizerPlugin implements Plugin<Project> {
 
     private
     static addTaskDependencies(Project project, ModernizerTask modernizerTask, ModernizerPluginExtension extension) {
-        modernizerTask.dependsOn project.tasks['classes']
         project.configure(project) {
             afterEvaluate {
+                modernizerTask.dependsOn('classes')
+                
                 if (extension.includeTestClasses) {
-                    modernizerTask.dependsOn project.tasks['testClasses']
+                    modernizerTask.dependsOn('testClasses')
+                }
+
+                project.getTasksByName('check', false).each {
+                    t -> t.dependsOn(modernizerTask)
                 }
             }
         }
-
-        project.tasks['check'].dependsOn modernizerTask
     }
 }

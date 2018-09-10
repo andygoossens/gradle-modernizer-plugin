@@ -52,6 +52,10 @@ class ModernizerTask extends AbstractModernizerTask {
             return
         }
 
+        if (extension.javaVersion == null) {
+            extension.setJavaVersion(project.targetCompatibility.toString())
+        }
+        
         def modernizerClass = threadContextClassLoader.loadClass("org.gaul.modernizer_maven_plugin.Modernizer")
 
         Map<String, Violation> allViolations = parseViolations(modernizerClass, extension.violationsFile)
