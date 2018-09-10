@@ -53,6 +53,7 @@ whenever it is deemed necessary.
 |javaVersion       |String  |${project.targetCompatibility}|Target Java version. Decides which violations will apply.                       |
 |failOnViolations  |boolean |false                         |Fail build when a violation has been detected.                                  |
 |includeTestClasses|boolean |false                         |Whether test classes will be searched for violations.                           |
+|violationLogLevel |String  |warn                          |Logs violations at this level. Possible values: error, warn, info, debug, trace |
 |violationsFile    |String  |null                          |User-specified violation file. Overrides standard violation checks.             |
 |violationsFiles   |String[]|[]                            |User-specified violation files. Overrides `violationsFile` and standard checks. |
 |exclusionsFile    |String  |null                          |Disables user-specified violations. See format description below.               |
