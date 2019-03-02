@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Andy Goossens
+ * Copyright 2016-2019 Andy Goossens
  * Copyright 2014-2018 Andrew Gaul
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
