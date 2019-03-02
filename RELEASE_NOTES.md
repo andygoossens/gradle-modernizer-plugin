@@ -1,5 +1,8 @@
 ### Next version
 
+
+### Version 1.1.2 (March 2, 2019)
+
 * Fix issue that prevented the plugin to be used with Gradle 5
 * Build plugin with Gradle 5.2.1
 

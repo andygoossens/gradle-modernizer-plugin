@@ -19,7 +19,7 @@ apply from: "$rootDir/gradle/gradle-plugin-publishing.gradle"
 apply from: "$rootDir/gradle/signing.gradle"
 
 group = 'com.github.andygoossens'
-version = '1.1.2-SNAPSHOT'
+version = '1.1.2'
 
 repositories {
     mavenCentral()
