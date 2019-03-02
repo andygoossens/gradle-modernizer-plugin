@@ -38,11 +38,11 @@ targetCompatibility = compatibilityVersion
 
 jar {
     manifest {
-        attributes 'Implementation-Title': 'Gradle Modernizer plugin',
-                'Implementation-Version': version,
-                'Built-Date': new Date(),
-                'Built-JDK': System.getProperty('java.version'),
-                'Built-Gradle': gradle.gradleVersion
+        attributes["Implementation-Title"] = "Gradle Modernizer plugin"
+        attributes["Implementation-Version"] = project.version
+        attributes["Built-Date"] = new Date()
+        attributes["Built-JDK"] = System.getProperty("java.version")
+        attributes["Built-Gradle"] = gradle.gradleVersion
     }
 }
 
