@@ -28,8 +28,8 @@ repositories {
 dependencies {
     compileOnly 'org.gaul:modernizer-maven-plugin:1.6.0'
 
-    compile localGroovy()
-    compile gradleApi()
+    implementation gradleApi()
+    implementation localGroovy()
 }
 
 ext.compatibilityVersion = '1.7'
@@ -47,6 +47,6 @@ jar {
 }
 
 wrapper {
-    gradleVersion = '4.10'
+    gradleVersion = '5.2.1'
     distributionType = Wrapper.DistributionType.ALL
 }

@@ -1,4 +1,1 @@
 rootProject.name = 'gradle-modernizer-plugin'
-
-// https://docs.gradle.org/4.10/userguide/publishing_maven.html#publishing_maven:deferred_configuration
-enableFeaturePreview('STABLE_PUBLISHING')
