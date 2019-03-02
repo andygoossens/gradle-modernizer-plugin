@@ -88,7 +88,6 @@ class ModernizerPlugin implements Plugin<Project> {
     private static ModernizerTask createTask(Project project, ModernizerPluginExtension extension) {
         ModernizerTask modernizerTask = project.tasks.create(TASK_NAME, ModernizerTask)
         modernizerTask.setExtension(extension)
-        modernizerTask.setProject(project)
 
         modernizerTask
     }

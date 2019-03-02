@@ -1,3 +1,7 @@
+### Next version
+
+* Fix issue that prevented the plugin to be used with Gradle 5
+
 ### Version 1.1.1 (September 10, 2018)
 
 * Fix usage when appearing in a plugins {} block
