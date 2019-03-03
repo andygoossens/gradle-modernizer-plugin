@@ -1,5 +1,6 @@
 ### Next version
 
+* Support Modernizer Maven Plugin 1.8.0
 
 ### Version 1.1.2 (March 2, 2019)
 

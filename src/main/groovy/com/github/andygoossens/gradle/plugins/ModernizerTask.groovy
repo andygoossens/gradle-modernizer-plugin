@@ -35,6 +35,8 @@ import static java.lang.String.format
 class ModernizerTask extends AbstractModernizerTask {
 
     private static final String CLASSPATH_PREFIX = "classpath:"
+    private static final String MODERNIZER_CLASS = "org.gaul.modernizer_maven_plugin.Modernizer"
+    private static final String DETECTOR_CLASS = "org.gaul.modernizer_maven_plugin.SuppressModernizerAnnotationDetector"
 
     @Internal
     ModernizerPluginExtension extension
@@ -51,8 +53,11 @@ class ModernizerTask extends AbstractModernizerTask {
         if (extension.javaVersion == null) {
             extension.setJavaVersion(project.targetCompatibility.toString())
         }
-        
-        def modernizerClass = threadContextClassLoader.loadClass("org.gaul.modernizer_maven_plugin.Modernizer")
+
+        FileCollection outputFileCollection = project.sourceSets.main.output.classesDirs
+        FileCollection testOutputFileCollection = project.sourceSets.test.output.classesDirs
+
+        def modernizerClass = threadContextClassLoader.loadClass(MODERNIZER_CLASS)
 
         Map<String, Violation> allViolations = parseViolations(modernizerClass, extension.violationsFile)
         for (String violationsFilePath : extension.violationsFiles) {
@@ -75,13 +80,41 @@ class ModernizerTask extends AbstractModernizerTask {
             }
         }
 
+        def detectorClass = threadContextClassLoader.loadClass(DETECTOR_CLASS)
+        def detectMethod = detectorClass.getDeclaredMethod("detect", File.class)
+        Set<String> ignoreClassNames = new HashSet<String>();
+        try {
+            def detectionFileCollection = outputFileCollection
+            if (extension.includeTestClasses) {
+                detectionFileCollection = detectionFileCollection.plus(testOutputFileCollection)
+            }
+
+            def detectionFiles = detectionFileCollection.files
+            for (File detectionFile : detectionFiles) {
+                Set<String> suppressedClassNames = detectMethod.invoke(null, detectionFile)
+                ignoreClassNames.addAll(suppressedClassNames)
+            }
+        } catch (IOException e) {
+            throw new GradleScriptException("Error reading suppressions", e);
+        }
+
+        Set<Pattern> allIgnoreClassNamePatterns = new HashSet<Pattern>()
+        for (String pattern : extension.ignoreClassNamePatterns) {
+            try {
+                allIgnoreClassNamePatterns.add(Pattern.compile(pattern))
+            } catch (PatternSyntaxException pse) {
+                throw new GradleScriptException(
+                        "Invalid ignore class name pattern", pse)
+            }
+        }
+
         modernizer = modernizerClass.newInstance(extension.javaVersion, allViolations, allExclusions,
-                allExclusionPatterns, extension.ignorePackages)
+                allExclusionPatterns, extension.ignorePackages, ignoreClassNames, allIgnoreClassNamePatterns)
 
         try {
-            long count = recurseFileCollection(project.sourceSets.main.output.classesDirs)
+            long count = recurseFileCollection(outputFileCollection)
             if (extension.includeTestClasses) {
-                count += recurseFileCollection(project.sourceSets.test.output.classesDirs)
+                count += recurseFileCollection(testOutputFileCollection)
             }
             if (extension.failOnViolations && count != 0) {
                 throw new GradleException("Found $count violations")
@@ -150,7 +183,7 @@ class ModernizerTask extends AbstractModernizerTask {
         for (File file : fileCollection.asList()) {
             count += recurseFiles(file)
         }
-        
+
         return count
     }
 
@@ -180,7 +213,7 @@ class ModernizerTask extends AbstractModernizerTask {
                     //
                     // It would be better if we let ASM extract the source file name from the .class file.
                     // And if that fails: fall back to .class file name.
-                    
+
                     // Original Maven code:
 //                    if (name.startsWith(outputDirectory.getPath())) {
 //                        name = sourceDirectory.getPath() + name.substring(outputDirectory.getPath().length());

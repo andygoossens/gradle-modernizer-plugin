@@ -36,14 +36,14 @@ apply from: "$rootDir/gradle/signing.gradle"
 // 3) local Maven repository: publish
 
 group = 'com.github.andygoossens'
-version = '1.1.2'
+version = '1.2.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compileOnly 'org.gaul:modernizer-maven-plugin:1.6.0'
+    compileOnly 'org.gaul:modernizer-maven-plugin:1.8.0'
 
     implementation gradleApi()
     implementation localGroovy()

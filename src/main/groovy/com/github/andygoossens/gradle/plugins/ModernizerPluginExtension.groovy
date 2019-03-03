@@ -114,6 +114,15 @@ class ModernizerPluginExtension {
      */
     @Input
     Set<String> ignorePackages = new HashSet<String>()
+    
+    /**
+     * Full qualified class names (incl. package) to ignore, specified using
+     * &lt;ignoreClassNamePattern&gt; child elements. Each exclusion should be
+     * a regular expression that matches a package and/or class; the package
+     * will be / not . separated (ASM's format).
+     */
+    @Input
+    Set<String> ignoreClassNamePatterns = new HashSet<String>()
 
     /**
      * Skips the plugin execution.
