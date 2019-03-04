@@ -1,5 +1,7 @@
 ### Next version
 
+### Version 1.2.0 (March 4, 2019)
+
 * Support Modernizer Maven Plugin 1.8.0
 * Try to find the source file across source sets
 

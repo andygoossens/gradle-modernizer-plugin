@@ -24,7 +24,7 @@ To use the plugin, include in your build script:
 ```groovy
 // You need to do this only once
 plugins {
-    id "com.github.andygoossens.gradle-modernizer-plugin" version "1.1.2"
+    id "com.github.andygoossens.gradle-modernizer-plugin" version "1.2.0"
 }
 
 // Option 1: Apply the plugin in each project where you want to use it
