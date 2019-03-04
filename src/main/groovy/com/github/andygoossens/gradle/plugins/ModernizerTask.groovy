@@ -21,11 +21,15 @@ import groovy.util.logging.Slf4j
 import org.gaul.modernizer_maven_plugin.Violation
 import org.gradle.api.GradleException
 import org.gradle.api.GradleScriptException
-import org.gradle.api.file.FileCollection
+import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.SourceSetOutput
 import org.xml.sax.SAXException
 
 import javax.xml.parsers.ParserConfigurationException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
@@ -54,8 +58,11 @@ class ModernizerTask extends AbstractModernizerTask {
             extension.setJavaVersion(project.targetCompatibility.toString())
         }
 
-        FileCollection outputFileCollection = project.sourceSets.main.output.classesDirs
-        FileCollection testOutputFileCollection = project.sourceSets.test.output.classesDirs
+        SourceDirectorySet inputFileCollection = project.sourceSets.main.allJava
+        SourceDirectorySet testInputFileCollection = project.sourceSets.test.allJava
+
+        SourceSetOutput outputFileCollection = project.sourceSets.main.output
+        SourceSetOutput testOutputFileCollection = project.sourceSets.test.output
 
         def modernizerClass = threadContextClassLoader.loadClass(MODERNIZER_CLASS)
 
@@ -84,9 +91,9 @@ class ModernizerTask extends AbstractModernizerTask {
         def detectMethod = detectorClass.getDeclaredMethod("detect", File.class)
         Set<String> ignoreClassNames = new HashSet<String>();
         try {
-            def detectionFileCollection = outputFileCollection
+            def detectionFileCollection = outputFileCollection.classesDirs
             if (extension.includeTestClasses) {
-                detectionFileCollection = detectionFileCollection.plus(testOutputFileCollection)
+                detectionFileCollection = detectionFileCollection.plus(testOutputFileCollection.classesDirs)
             }
 
             def detectionFiles = detectionFileCollection.files
@@ -112,9 +119,9 @@ class ModernizerTask extends AbstractModernizerTask {
                 allExclusionPatterns, extension.ignorePackages, ignoreClassNames, allIgnoreClassNamePatterns)
 
         try {
-            long count = recurseFileCollection(outputFileCollection)
+            long count = recurseFileCollection(inputFileCollection, outputFileCollection)
             if (extension.includeTestClasses) {
-                count += recurseFileCollection(testOutputFileCollection)
+                count += recurseFileCollection(testInputFileCollection, testOutputFileCollection)
             }
             if (extension.failOnViolations && count != 0) {
                 throw new GradleException("Found $count violations")
@@ -178,58 +185,95 @@ class ModernizerTask extends AbstractModernizerTask {
         }
     }
 
-    private long recurseFileCollection(FileCollection fileCollection) throws IOException {
+    private long recurseFileCollection(SourceDirectorySet sourceDirectorySet, SourceSetOutput sourceSetOutput) throws IOException {
         long count = 0
-        for (File file : fileCollection.asList()) {
-            count += recurseFiles(file)
+        for (File classDir : sourceSetOutput.classesDirs) {
+            count += recurseDirectories(sourceDirectorySet, classDir, classDir)
         }
 
         return count
     }
 
-    private long recurseFiles(File file) throws IOException {
+    private long recurseDirectories(SourceDirectorySet sourceDirectorySet, File outputDirectory, File outputFile) throws IOException {
         long count = 0
-        if (!file.exists()) {
+        if (!outputFile.exists()) {
             return count
-        }
-        if (file.isDirectory()) {
-            String[] children = file.list()
+        } else if (outputFile.isDirectory()) {
+            String[] children = outputFile.list()
             if (children != null) {
                 for (String child : children) {
-                    count += recurseFiles(new File(file, child))
+                    count += recurseDirectories(sourceDirectorySet, outputDirectory, new File(outputFile, child))
                 }
             }
-        } else if (file.getPath().endsWith(".class")) {
-            InputStream is = new FileInputStream(file)
+        } else {
+            count += processFile(sourceDirectorySet, outputDirectory, outputFile)
+        }
+
+        return count
+    }
+
+    private long processFile(SourceDirectorySet sourceDirectorySet, File outputDirectory, File outputFile) throws IOException {
+        long count = 0
+        if (!outputFile.exists()) {
+            return count
+        }
+
+        if (outputFile.getPath().endsWith(".class")) {
+            InputStream is = new FileInputStream(outputFile)
             try {
                 Collection occurrences = modernizer.check(is)
                 for (def occurrence : occurrences) {
-                    String name = file.getPath()
-                    // Commented out until there is a better way for doing this.
-                    //
-                    // Known issues:
-                    // * Gradle supports multiple source dirs, so we need to loop over them to find the source file.
-                    // * Maybe the source file wasn't Java at all? It could have been Groovy.
-                    //
-                    // It would be better if we let ASM extract the source file name from the .class file.
-                    // And if that fails: fall back to .class file name.
-
-                    // Original Maven code:
-//                    if (name.startsWith(outputDirectory.getPath())) {
-//                        name = sourceDirectory.getPath() + name.substring(outputDirectory.getPath().length());
-//                        name = name.substring(0, name.length() - ".class".length()) + ".java";
-//                    } else if (name.startsWith(testOutputDirectory.getPath())) {
-//                        name = testSourceDirectory.getPath() + name.substring(testOutputDirectory.getPath().length());
-//                        name = name.substring(0, name.length() - ".class".length()) + ".java";
-//                    }
-                    emitViolation(name, occurrence)
+                    String sourceFile = findSourceFile(sourceDirectorySet, outputDirectory, outputFile)
+                    emitViolation(sourceFile, occurrence)
+                    
                     ++count
                 }
             } finally {
                 StreamUtils.closeQuietly(is)
             }
         }
+
         return count
+    }
+
+    private static String findSourceFile(SourceDirectorySet sourceDirectorySet, File outputDirectory, File outputFile) {
+        String name = outputFile.getPath()
+
+        Path outputFilePath = outputFile.toPath()
+        Path outputDirectoryPath = outputDirectory.toPath()
+        Path relativePath = outputDirectoryPath.relativize(outputFilePath)
+
+        List<String> possibleSourceFiles = getPossibleSourceFiles(relativePath.toString())
+        for (File sourceDir : sourceDirectorySet.srcDirs) {
+            for (String possibleSourceFile : possibleSourceFiles) {
+                Path possibleSourcePath = Paths.get(sourceDir.absolutePath, possibleSourceFile)
+                if (Files.exists(possibleSourcePath)) {
+                    return possibleSourcePath
+                }
+            }
+        }
+        
+        // We tried our best, but we could not find the source file. Return the class file.
+        name
+    }
+
+    private static List<String> getPossibleSourceFiles(String classFileName) {
+        // Cut off the extension
+        int i = classFileName.lastIndexOf('.');
+        classFileName = classFileName.substring(0, i);
+
+        // Cut off inner classes
+        int j = classFileName.indexOf('$');
+        if (j >= 0) {
+            classFileName = classFileName.substring(0, j);
+        }
+
+        // Return in order of likelihood
+        return [
+                classFileName + ".java",
+                classFileName + ".kt",
+                classFileName + ".groovy",
+        ]
     }
 
     private emitViolation(String name, occurrence) {
