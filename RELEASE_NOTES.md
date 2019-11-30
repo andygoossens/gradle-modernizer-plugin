@@ -8,6 +8,7 @@
 ### Version 1.2.0 (March 4, 2019)
 
 * Support Modernizer Maven Plugin 1.8.0
+* Ignore classes annotated with @SuppressModernizer
 * Try to find the source file across source sets
 
 ### Version 1.1.2 (March 2, 2019)
