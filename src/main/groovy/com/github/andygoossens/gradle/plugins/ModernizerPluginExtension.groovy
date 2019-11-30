@@ -91,6 +91,13 @@ class ModernizerPluginExtension {
     String violationLogLevel = "warn"
 
     /**
+     * Classes annotated with {@code @Generated} will be excluded from
+     * scanning.
+     */
+    @Input
+    boolean ignoreGeneratedClasses = true
+
+    /**
      * Violations to disable. Each exclusion should be in the javap format:
      *
      * java/lang/String.getBytes:(Ljava/lang/String;)[B.

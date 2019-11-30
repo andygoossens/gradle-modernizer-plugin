@@ -24,7 +24,7 @@ To use the plugin, include in your build script:
 ```groovy
 // You need to do this only once
 plugins {
-    id "com.github.andygoossens.gradle-modernizer-plugin" version "1.2.0"
+    id "com.github.andygoossens.gradle-modernizer-plugin" version "1.3.0"
 }
 
 // Option 1: Apply the plugin in each project where you want to use it
@@ -52,21 +52,22 @@ whenever it is deemed necessary.
 
 ### Extension properties
 
-| Property name         | Type   | Default value                | Description                                                                        |
-|-----------------------|--------|------------------------------|------------------------------------------------------------------------------------|
-|toolVersion            |String  |See table below               |Version of modernizer-maven-plugin that will be used.                               |
-|javaVersion            |String  |${project.targetCompatibility}|Target Java version. Decides which violations will apply.                           |
-|failOnViolations       |boolean |false                         |Fail build when a violation has been detected.                                      |
-|includeTestClasses     |boolean |false                         |Whether test classes will be searched for violations.                               |
-|violationLogLevel      |String  |warn                          |Logs violations at this level. Possible values: error, warn, info, debug, trace     |
-|violationsFile         |String  |null                          |User-specified violation file. Overrides standard violation checks.                 |
-|violationsFiles        |String[]|[]                            |User-specified violation files. Overrides `violationsFile` and standard checks.     |
-|exclusionsFile         |String  |null                          |Disables user-specified violations. See format description below.                   |
-|exclusions             |String[]|[]                            |Violations to disable. See format description below.                                |
-|exclusionPatterns      |String[]|[]                            |Violation patterns to disable. See format description below.                        |
-|ignorePackages         |String[]|[]                            |Package prefixes to ignore. See format description below.                           |
-|ignoreClassNamePatterns|String[]|[]                            |Full qualified class names (incl. package) to ignore. See format description below. |
-|skip                   |boolean |false                         |Whether task should be skipped.                                                     |
+| Property name         | Type   | Default value                | Description                                                                                      |
+|-----------------------|--------|------------------------------|--------------------------------------------------------------------------------------------------|
+|toolVersion            |String  |See table below               |Version of modernizer-maven-plugin that will be used.                                             |
+|javaVersion            |String  |${project.targetCompatibility}|Target Java version. Decides which violations will apply.                                         |
+|failOnViolations       |boolean |false                         |Fail build when a violation has been detected.                                                    |
+|includeTestClasses     |boolean |false                         |Whether test classes will be searched for violations.                                             |
+|violationLogLevel      |String  |warn                          |Logs violations at this level. Possible values: error, warn, info, debug, trace                   |
+|violationsFile         |String  |null                          |User-specified violation file. Overrides standard violation checks.                               |
+|violationsFiles        |String[]|[]                            |User-specified violation files. Overrides `violationsFile` and standard checks.                   |
+|exclusionsFile         |String  |null                          |Disables user-specified violations. See format description below.                                 |
+|exclusions             |String[]|[]                            |Violations to disable. See format description below.                                              |
+|exclusionPatterns      |String[]|[]                            |Violation patterns to disable. See format description below.                                      |
+|ignorePackages         |String[]|[]                            |Package prefixes to ignore. See format description below.                                         |
+|ignoreClassNamePatterns|String[]|[]                            |Full qualified class names (incl. package) to ignore. See format description below.               |
+|ignoreGeneratedClasses |boolean |true                          |Whether classes annotated with annotations that contain "Generated" in their name will be ignored.|
+|skip                   |boolean |false                         |Whether task should be skipped.                                                                   |
 
 #### Usage example
 
@@ -147,14 +148,25 @@ ignoreClassNamePatterns = [
 You cannot only ignore elements by using extension properties (see above), you
 can indicate that violations within a class or method should be ignored by
 the plugin by adding `@SuppressModernizer` to the element you'd like
-to ignore and adding the following Gradle dependency:
+to ignore:
+
+```java
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
+
+public class Example {
+    @SuppressModernizer
+    public static void method() { ... }
+}
+```
+
+Add the following dependency to your Gradle build script:
 
 ```groovy
 // Option 1: compile time dependency (Gradle's old way)
-compile 'org.gaul:modernizer-maven-annotations:1.8.0'
+compile 'org.gaul:modernizer-maven-annotations:2.0.0'
 
 // Option 2: implementation dependency (Gradle's new way)
-implementation 'org.gaul:modernizer-maven-annotations:1.8.0'
+implementation 'org.gaul:modernizer-maven-annotations:2.0.0'
 ```
 
 ## Version comparison
@@ -167,6 +179,7 @@ The table below describes how they relate to each other.
 | 1.0.x                    | 1.6.0                   |
 | 1.1.x                    | 1.6.0                   |
 | 1.2.x                    | 1.8.0                   |
+| 1.3.x                    | 2.0.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
 Specify in the `toolVersion` extension property the version that you want to use. Pay attention:

@@ -1,5 +1,8 @@
 ### Next version
 
+* Support Modernizer Maven Plugin 2.0.0
+* Ignore classes annotated with annotations that contain "Generated" in their name
+
 ### Version 1.2.0 (March 4, 2019)
 
 * Support Modernizer Maven Plugin 1.8.0

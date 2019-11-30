@@ -40,7 +40,8 @@ class ModernizerTask extends AbstractModernizerTask {
 
     private static final String CLASSPATH_PREFIX = "classpath:"
     private static final String MODERNIZER_CLASS = "org.gaul.modernizer_maven_plugin.Modernizer"
-    private static final String DETECTOR_CLASS = "org.gaul.modernizer_maven_plugin.SuppressModernizerAnnotationDetector"
+    private static final String SUPPRESS_DETECTOR_CLASS = "org.gaul.modernizer_maven_plugin.SuppressModernizerAnnotationDetector"
+    private static final String GENERATOR_DETECTOR_CLASS = "org.gaul.modernizer_maven_plugin.SuppressGeneratedAnnotationDetector"
 
     @Internal
     ModernizerPluginExtension extension
@@ -87,19 +88,28 @@ class ModernizerTask extends AbstractModernizerTask {
             }
         }
 
-        def detectorClass = threadContextClassLoader.loadClass(DETECTOR_CLASS)
-        def detectMethod = detectorClass.getDeclaredMethod("detect", File.class)
-        Set<String> ignoreClassNames = new HashSet<String>();
+        def suppressDetectorClass = threadContextClassLoader.loadClass(SUPPRESS_DETECTOR_CLASS)
+        def suppressDetectMethod = suppressDetectorClass.getDeclaredMethod("detect", File.class)
+        def generatedDetectorClass = threadContextClassLoader.loadClass(GENERATOR_DETECTOR_CLASS)
+        def generatedDetectMethod = generatedDetectorClass.getDeclaredMethod("detect", File.class)
+        Set<String> ignoreClassNames = new HashSet<String>()
         try {
             def detectionFileCollection = outputFileCollection.classesDirs
             if (extension.includeTestClasses) {
-                detectionFileCollection = detectionFileCollection.plus(testOutputFileCollection.classesDirs)
+                detectionFileCollection += testOutputFileCollection.classesDirs
             }
 
             def detectionFiles = detectionFileCollection.files
             for (File detectionFile : detectionFiles) {
-                Set<String> suppressedClassNames = detectMethod.invoke(null, detectionFile)
+                // Ignore classes annotated with org.gaul.modernizer_maven_annotations.SuppressModernize
+                Set<String> suppressedClassNames = suppressDetectMethod.invoke(null, detectionFile)
                 ignoreClassNames.addAll(suppressedClassNames)
+                
+                if (extension.ignoreGeneratedClasses) {
+                    // Ignore classes annotated with Generated (does not matter from which package)
+                    Set<String> generatedClassNames = generatedDetectMethod.invoke(null, detectionFile)
+                    ignoreClassNames.addAll(generatedClassNames)
+                }
             }
         } catch (IOException e) {
             throw new GradleScriptException("Error reading suppressions", e);
@@ -225,7 +235,7 @@ class ModernizerTask extends AbstractModernizerTask {
                 for (def occurrence : occurrences) {
                     String sourceFile = findSourceFile(sourceDirectorySet, outputDirectory, outputFile)
                     emitViolation(sourceFile, occurrence)
-                    
+
                     ++count
                 }
             } finally {
@@ -252,7 +262,7 @@ class ModernizerTask extends AbstractModernizerTask {
                 }
             }
         }
-        
+
         // We tried our best, but we could not find the source file. Return the class file.
         name
     }
