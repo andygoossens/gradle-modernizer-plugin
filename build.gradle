@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
     // Necessary to publish to Gradle Plugins Portal (disable it when publishing to Sonatype OSS)
-    id 'com.gradle.plugin-publish' version '0.10.0'
+    id 'com.gradle.plugin-publish' version '0.10.1'
     id 'java-gradle-plugin'
 }
 
