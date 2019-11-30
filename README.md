@@ -46,8 +46,8 @@ If you want to call the `modernizer` task directly:
 ./gradlew modernizer
 ```
 
-But most of the time you don't need to call the `modernizer` task yourself.
-The task knows its place inside the build lifecycle and it will execute
+Most of the time you don't need to call the `modernizer` task yourself.
+The task knows its place inside the build lifecycle, and it will execute
 whenever it is deemed necessary.
 
 ### Extension properties
@@ -144,7 +144,7 @@ ignoreClassNamePatterns = [
 
 ### Ignoring elements
 
-You can not only ignore elements by using extension properties (see above), you
+You cannot only ignore elements by using extension properties (see above), you
 can indicate that violations within a class or method should be ignored by
 the plugin by adding `@SuppressModernizer` to the element you'd like
 to ignore and adding the following Gradle dependency:
@@ -169,7 +169,7 @@ The table below describes how they relate to each other.
 | 1.2.x                    | 1.8.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
-Specify in the `toolVersion` extension property the version that you want to use. But pay attention:
+Specify in the `toolVersion` extension property the version that you want to use. Pay attention:
 This might break when there is an API change!
 
 
@@ -177,8 +177,8 @@ This might break when there is an API change!
 
 ### I found an undetected case of legacy API. Can you add a new violation rule?
 
-Sounds great! However I cannot add it myself as the list of violations rules is maintained in
-[Modernizer Maven Plugin](https://github.com/andrewgaul/modernizer-maven-plugin).
+Sounds great! However, I cannot add it myself as
+[Modernizer Maven Plugin](https://github.com/andrewgaul/modernizer-maven-plugin) maintains the list of violations rules.
 Open an issue there and describe what you found.
 
 Note that it might take some time for them to release a new version with your rule.
@@ -190,10 +190,10 @@ That is not a question. Unfortunately, I might not have found the time to releas
 In the meanwhile you can specify the desired version in the `toolVersion` extension property.
 The Gradle plugin will then pickup the requested version and, if the API is still the same, use it.
 
-### Will you add feature X?
+### Will you add a feature X?
 
 That depends on whether the feature is specific to Gradle. If it is, then I will see what I can do.
-However if it requires changes in Modernizer Maven Plugin, then it is up to its maintainers.
+However, if it requires changes in Modernizer Maven Plugin, then it is up to its maintainers.
 
 
 ## References
