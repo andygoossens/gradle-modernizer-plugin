@@ -1,5 +1,7 @@
 # Gradle Modernizer Plugin
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.andygoossens/gradle-modernizer-plugin.svg)](https://search.maven.org/search?q=g:com.github.andygoossens%20AND%20a:gradle-modernizer-plugin)
+
 Gradle Modernizer Plugin detects uses of legacy APIs which modern Java versions
 supersede.
 
