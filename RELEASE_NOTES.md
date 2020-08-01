@@ -1,6 +1,6 @@
 ### Next version
 
-### Version 1.4.0 (XXX)
+### Version 1.4.0 (August 2, 2020)
 
 * Support Modernizer Maven Plugin 2.1.0
 * Build plugin with Gradle 6.5.1
