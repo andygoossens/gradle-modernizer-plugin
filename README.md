@@ -183,6 +183,7 @@ The table below describes how they relate to each other.
 | 1.1.x                    | 1.6.0                   |
 | 1.2.x                    | 1.8.0                   |
 | 1.3.x                    | 2.0.0                   |
+| 1.4.x                    | 2.1.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
 Specify in the `toolVersion` extension property the version that you want to use. Pay attention:
@@ -220,12 +221,12 @@ However, if it requires changes in Modernizer Maven Plugin, then it is up to its
 
 ```
 Licensed under the Apache License, Version 2.0
-Copyright (C) 2016-2019 Andy Goossens
+Copyright (C) 2016-2020 Andy Goossens
 
 Inspired by, and based upon code from:
 
 Modernizer Maven Plugin
-Copyright (C) 2014-2019 Andrew Gaul
+Copyright (C) 2014-2020 Andrew Gaul
 
 Gradle Docker plugin
 Copyright (C) 2014 the original author or authors.
