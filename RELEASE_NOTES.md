@@ -4,6 +4,7 @@
 
 * Support Modernizer Maven Plugin 2.2.0
 * Build plugin with Gradle 7.1.1
+* Simplified Gradle's publishing configuration
 
 ### Version 1.4.0 (August 2, 2020)
 
