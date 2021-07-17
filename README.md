@@ -184,6 +184,7 @@ The table below describes how they relate to each other.
 | 1.2.x                    | 1.8.0                   |
 | 1.3.x                    | 2.0.0                   |
 | 1.4.x                    | 2.1.0                   |
+| 1.5.x                    | 2.2.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
 Specify in the `toolVersion` extension property the version that you want to use. Pay attention:
