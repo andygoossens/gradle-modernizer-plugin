@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         // Necessary to publish to Sonatype OSS
@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
     // Necessary to publish to Gradle Plugins Portal (disable it when publishing to Sonatype OSS)
-    id 'com.gradle.plugin-publish' version '0.12.0'
+    id 'com.gradle.plugin-publish' version '0.15.0'
     id 'java-gradle-plugin'
 }
 
