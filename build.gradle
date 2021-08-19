@@ -1,11 +1,8 @@
 plugins {
-    id 'java-gradle-plugin'
+    id 'groovy-gradle-plugin'
     id 'maven-publish'
     id 'com.gradle.plugin-publish' version '0.15.0'
 }
-
-apply plugin: 'groovy'
-apply plugin: 'java'
 
 apply from: "$rootDir/gradle/gradle-plugin-publishing.gradle"
 
