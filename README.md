@@ -11,7 +11,7 @@ For example, Modernizer can detect uses of `Vector` instead of `ArrayList`,
 `String.getBytes(String)` instead of `String.getBytes(Charset)`, and
 Guava `Objects.equal` instead of Java 7 `Objects.equals`.
 The default configuration detects
-[roughly 200 legacy APIs](https://github.com/gaul/modernizer-maven-plugin/blob/master/modernizer-maven-plugin/src/main/resources/modernizer.xml),
+[over 200 legacy APIs](https://github.com/gaul/modernizer-maven-plugin/blob/master/modernizer-maven-plugin/src/main/resources/modernizer.xml),
 including third-party libraries like
 [Guava](https://github.com/google/guava).
 
@@ -30,7 +30,12 @@ plugins {
 }
 
 // Option 1: Apply the plugin in each project where you want to use it
+// Gradle's old way:
 apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
+// Gradle's new way:
+plugins {
+    id 'com.github.andygoossens.gradle-modernizer-plugin'
+}
 
 // Option 2: Apply the plugin in all projects (even in the root)
 allprojects {
@@ -68,7 +73,7 @@ whenever it is deemed necessary.
 |exclusionPatterns      |String[]|[]                            |Violation patterns to disable. See format description below.                                      |
 |ignorePackages         |String[]|[]                            |Package prefixes to ignore. See format description below.                                         |
 |ignoreClassNamePatterns|String[]|[]                            |Full qualified class names (incl. package) to ignore. See format description below.               |
-|ignoreGeneratedClasses |boolean |true                          |Whether classes annotated with annotations that contain "Generated" in their name will be ignored.|
+|ignoreGeneratedClasses |boolean |true                          |Whether classes annotated with an annotation whose retention policy is <code>runtime</code> or <code>class</code> and whose simple name contain "Generated" will be ignored.|
 |skip                   |boolean |false                         |Whether task should be skipped.                                                                   |
 
 #### Usage example
@@ -165,10 +170,10 @@ Add the following dependency to your Gradle build script:
 
 ```groovy
 // Option 1: compile time dependency (Gradle's old way)
-compile 'org.gaul:modernizer-maven-annotations:2.0.0'
+compile 'org.gaul:modernizer-maven-annotations:2.3.0'
 
 // Option 2: implementation dependency (Gradle's new way)
-implementation 'org.gaul:modernizer-maven-annotations:2.0.0'
+implementation 'org.gaul:modernizer-maven-annotations:2.3.0'
 ```
 
 ## Version comparison

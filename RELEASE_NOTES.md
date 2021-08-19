@@ -3,7 +3,7 @@
 ### Version 1.6.0 (August 19, 2021)
 
 * Support Modernizer Maven Plugin 2.3.0
- 
+
 ### Version 1.5.0 (July 17, 2021)
 
 * Support Modernizer Maven Plugin 2.2.0
