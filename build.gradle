@@ -14,17 +14,14 @@ apply from: "$rootDir/gradle/gradle-plugin-publishing.gradle"
 // 2) Gradle Plugins Portal: publishPlugins
 
 group = 'com.github.andygoossens'
-version = '1.5.0'
+version = '1.6.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compileOnly 'org.gaul:modernizer-maven-plugin:2.2.0'
-
-    implementation gradleApi()
-    implementation localGroovy()
+    compileOnly 'org.gaul:modernizer-maven-plugin:2.3.0'
 }
 
 ext.compatibilityVersion = '1.8'

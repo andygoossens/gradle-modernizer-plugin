@@ -26,7 +26,7 @@ To use the plugin, include in your build script:
 ```groovy
 // You need to do this only once
 plugins {
-    id "com.github.andygoossens.gradle-modernizer-plugin" version "1.3.0"
+    id "com.github.andygoossens.gradle-modernizer-plugin" version "1.6.0"
 }
 
 // Option 1: Apply the plugin in each project where you want to use it
@@ -184,6 +184,7 @@ The table below describes how they relate to each other.
 | 1.3.x                    | 2.0.0                   |
 | 1.4.x                    | 2.1.0                   |
 | 1.5.x                    | 2.2.0                   |
+| 1.6.x                    | 2.3.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
 Specify in the `toolVersion` extension property the version that you want to use. Pay attention:
@@ -221,12 +222,12 @@ However, if it requires changes in Modernizer Maven Plugin, then it is up to its
 
 ```
 Licensed under the Apache License, Version 2.0
-Copyright (C) 2016-2020 Andy Goossens
+Copyright (C) 2016-2021 Andy Goossens
 
 Inspired by, and based upon code from:
 
 Modernizer Maven Plugin
-Copyright (C) 2014-2020 Andrew Gaul
+Copyright (C) 2014-2021 Andrew Gaul
 
 Gradle Docker plugin
 Copyright (C) 2014 the original author or authors.
