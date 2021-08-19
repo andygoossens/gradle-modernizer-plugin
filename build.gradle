@@ -11,7 +11,7 @@ apply from: "$rootDir/gradle/gradle-plugin-publishing.gradle"
 // 2) Gradle Plugins Portal: publishPlugins
 
 group = 'com.github.andygoossens'
-version = '1.6.0-SNAPSHOT'
+version = '1.6.0'
 
 repositories {
     mavenCentral()
