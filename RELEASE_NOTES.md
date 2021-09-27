@@ -1,5 +1,7 @@
 ### Next version
 
+* Support Gradle setting `RepositoriesMode.FAIL_ON_PROJECT_REPOS`
+
 ### Version 1.6.0 (August 19, 2021)
 
 * Support Modernizer Maven Plugin 2.3.0

@@ -31,14 +31,6 @@ class ModernizerPlugin implements Plugin<Project> {
     void apply(Project project) {
         Configuration configuration = configureConfiguration(project)
 
-        // when the user did not define a repository, fallback to build script
-        // repositories to resolve dependencies as a last resort
-        if (project.repositories.size() == 0) {
-            project.afterEvaluate {
-                project.repositories.addAll(project.buildscript.repositories.collect())
-            }
-        }
-
         ModernizerPluginExtension extension = createExtension(project)
         configureDefaultDependencies(project, configuration, extension)
 

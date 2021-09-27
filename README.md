@@ -29,6 +29,10 @@ plugins {
     id "com.github.andygoossens.gradle-modernizer-plugin" version "1.6.0"
 }
 
+repositories {
+    mavenCentral()
+}
+
 // Option 1: Apply the plugin in each project where you want to use it
 // Gradle's old way:
 apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
