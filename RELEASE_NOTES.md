@@ -1,6 +1,8 @@
 ### Next version
 
 * Support Gradle setting `RepositoriesMode.FAIL_ON_PROJECT_REPOS`
+* Introduce cleaner plugin id `com.github.andygoossens.modernizer` but
+  `com.github.andygoossens.gradle-modernizer-plugin` will keep on working for the foreseeable future.
 
 ### Version 1.6.0 (August 19, 2021)
 

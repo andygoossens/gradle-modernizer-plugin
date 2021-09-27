@@ -7,6 +7,14 @@ pluginBundle {
 gradlePlugin {
     plugins {
         modernizerPlugin {
+            id = 'com.github.andygoossens.modernizer'
+            displayName = 'Gradle Modernizer plugin'
+            description = 'Detects use of legacy APIs which modern Java versions supersede.'
+            implementationClass = 'com.github.andygoossens.gradle.plugins.ModernizerPlugin'
+        }
+        // Avoid using this for new projects.
+        // TODO: Should show a 'deprecated' warning somehow.
+        legacyIdModernizerPlugin {
             id = 'com.github.andygoossens.gradle-modernizer-plugin'
             displayName = 'Gradle Modernizer plugin'
             description = 'Detects use of legacy APIs which modern Java versions supersede.'
