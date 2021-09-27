@@ -13,10 +13,6 @@ apply from: "$rootDir/gradle/gradle-plugin-publishing.gradle"
 group = 'com.github.andygoossens'
 version = '1.6.1-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     compileOnly 'org.gaul:modernizer-maven-plugin:2.3.0'
 }
