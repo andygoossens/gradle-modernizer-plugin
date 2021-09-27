@@ -17,7 +17,7 @@ gradlePlugin {
         legacyIdModernizerPlugin {
             id = 'com.github.andygoossens.gradle-modernizer-plugin'
             displayName = 'Gradle Modernizer plugin'
-            description = 'Detects use of legacy APIs which modern Java versions supersede.'
+            description = 'Detects use of legacy APIs which modern Java versions supersede (legacy plugin id, please use com.github.andygoossens.modernizer instead)'
             implementationClass = 'com.github.andygoossens.gradle.plugins.ModernizerPlugin'
         }
     }

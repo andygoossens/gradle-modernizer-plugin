@@ -1,6 +1,6 @@
 # Gradle Modernizer Plugin
 
-![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.andygoossens.gradle-modernizer-plugin)
+![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.andygoossens.modernizer)
 
 Gradle Modernizer Plugin detects uses of legacy APIs which modern Java versions
 supersede.
@@ -26,7 +26,7 @@ To use the plugin, include in your build script:
 ```groovy
 // You need to do this only once
 plugins {
-    id "com.github.andygoossens.gradle-modernizer-plugin" version "1.6.0"
+    id "com.github.andygoossens.modernizer" version "1.6.1"
 }
 
 repositories {
@@ -35,22 +35,25 @@ repositories {
 
 // Option 1: Apply the plugin in each project where you want to use it
 // Gradle's old way:
-apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
+apply plugin: 'com.github.andygoossens.modernizer'
 // Gradle's new way:
 plugins {
-    id 'com.github.andygoossens.gradle-modernizer-plugin'
+    id 'com.github.andygoossens.modernizer'
 }
 
 // Option 2: Apply the plugin in all projects (even in the root)
 allprojects {
-    apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
+    apply plugin: 'com.github.andygoossens.modernizer'
 }
 
 // Option 3: Apply the plugin in all sub-projects (not the root)
 subprojects {
-    apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
+    apply plugin: 'com.github.andygoossens.modernizer'
 }
 ```
+
+If you are still using the old plugin id `com.github.andygoossens.gradle-modernizer-plugin` then
+please switch to `com.github.andygoossens.modernizer` instead.
 
 If you want to call the `modernizer` task directly:
 ```bash
