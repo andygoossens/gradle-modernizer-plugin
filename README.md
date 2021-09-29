@@ -26,7 +26,11 @@ To use the plugin, include in your build script:
 ```groovy
 // You need to do this only once
 plugins {
+    // Option A: When your root project has a SourceSet
+    // e.g. the root project is applying the java/groovy/kotlin plugin as well 
     id "com.github.andygoossens.modernizer" version "1.6.1"
+    // Option B: When your root project does not have a SourceSet
+    id "com.github.andygoossens.modernizer" version "1.6.1" apply false
 }
 
 repositories {
@@ -41,12 +45,14 @@ plugins {
     id 'com.github.andygoossens.modernizer'
 }
 
-// Option 2: Apply the plugin in all projects (even in the root)
+// Option 2: Apply the plugin in all projects (even in the root project)
+//           Preferably used with option A (= not mentioning 'apply false')
 allprojects {
     apply plugin: 'com.github.andygoossens.modernizer'
 }
 
-// Option 3: Apply the plugin in all sub-projects (not the root)
+// Option 3: Apply the plugin in all sub-projects (but not the root project)
+//           Preferably used with option B (= mentioning 'apply false')
 subprojects {
     apply plugin: 'com.github.andygoossens.modernizer'
 }
@@ -91,6 +97,9 @@ modernizer {
     includeTestClasses = true
 }
 ```
+
+Note that you can only configure the plugin in projects where the plugin has been applied.
+See "Usage" section above.
 
 #### Formats
 
