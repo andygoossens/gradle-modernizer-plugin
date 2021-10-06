@@ -17,9 +17,11 @@ dependencies {
     compileOnly 'org.gaul:modernizer-maven-plugin:2.3.0'
 }
 
-ext.compatibilityVersion = '1.8'
-sourceCompatibility = compatibilityVersion
-targetCompatibility = compatibilityVersion
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
