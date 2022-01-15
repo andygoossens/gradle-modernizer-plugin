@@ -1,10 +1,14 @@
 ### Next version
 
+* Exclude "plexus-utils" dependency (coming from upstream) to avoid a CVE
+  warning. #1
+
 ### Version 1.6.1 (September 28, 2021)
 
 * Support Gradle setting `RepositoriesMode.FAIL_ON_PROJECT_REPOS`
 * Introduce cleaner plugin id `com.github.andygoossens.modernizer` but
-  `com.github.andygoossens.gradle-modernizer-plugin` will keep on working for the foreseeable future.
+  `com.github.andygoossens.gradle-modernizer-plugin` will keep on working for
+  the foreseeable future.
 
 ### Version 1.6.0 (August 19, 2021)
 
@@ -25,7 +29,8 @@
 
 * Support Modernizer Maven Plugin 2.0.0
 * Build plugin with Gradle 5.6.4
-* Ignore classes annotated with annotations that contain "Generated" in their name
+* Ignore classes annotated with annotations that contain "Generated" in their
+  name
 
 ### Version 1.2.0 (March 4, 2019)
 

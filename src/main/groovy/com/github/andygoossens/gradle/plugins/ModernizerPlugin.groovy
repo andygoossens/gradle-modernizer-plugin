@@ -43,9 +43,11 @@ class ModernizerPlugin implements Plugin<Project> {
 
     private static Configuration configureConfiguration(Project project) {
         project.getConfigurations().create(MODERNIZER_CONFIGURATION_NAME)
-                .setVisible(false)
-                .setTransitive(true)
-                .setDescription("The Modernizer libraries to be used for this project.")
+            .setVisible(false)
+            .setTransitive(true)
+            .setDescription("The Modernizer libraries to be used for this project.")
+            // avoid CVE warning from upstream dependency. see issue #1
+            .exclude([group: "org.codehaus.plexus", module: "plexus-utils"])
     }
 
     private static ModernizerPluginExtension createExtension(Project project) {
