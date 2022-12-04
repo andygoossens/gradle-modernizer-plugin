@@ -14,7 +14,7 @@ group = 'com.github.andygoossens'
 version = '1.6.2'
 
 dependencies {
-    compileOnly 'org.gaul:modernizer-maven-plugin:2.3.0'
+    compileOnly 'org.gaul:modernizer-maven-plugin:2.5.0'
 }
 
 java {
