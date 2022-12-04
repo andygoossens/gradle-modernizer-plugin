@@ -1,5 +1,7 @@
 ### Next version
 
+* Support Modernizer Maven Plugin 2.5.0
+
 ### Version 1.6.2 (January 15, 2022)
 
 * Exclude "plexus-utils" dependency (coming from upstream) to avoid a CVE

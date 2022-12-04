@@ -248,7 +248,7 @@ Copyright (C) 2016-2022 Andy Goossens
 Inspired by, and based upon code from:
 
 Modernizer Maven Plugin
-Copyright (C) 2014-2021 Andrew Gaul
+Copyright (C) 2014-2022 Andrew Gaul
 
 Gradle Docker plugin
 Copyright (C) 2014 the original author or authors.

@@ -23,7 +23,7 @@ import org.gradle.api.artifacts.Configuration
 class ModernizerPlugin implements Plugin<Project> {
 
     public static final String MODERNIZER_CONFIGURATION_NAME = 'modernizer'
-    public static final String MODERNIZER_DEFAULT_VERSION = '2.3.0'
+    public static final String MODERNIZER_DEFAULT_VERSION = '2.5.0'
     public static final String EXTENSION_NAME = 'modernizer'
     public static final String TASK_NAME = 'modernizer'
 
