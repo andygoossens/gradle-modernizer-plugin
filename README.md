@@ -28,9 +28,9 @@ To use the plugin, include in your build script:
 plugins {
     // Option A: When your root project has a SourceSet
     // e.g. the root project is applying the java/groovy/kotlin plugin as well 
-    id "com.github.andygoossens.modernizer" version "1.7.0"
+    id "com.github.andygoossens.modernizer" version "1.8.0"
     // Option B: When your root project does not have a SourceSet
-    id "com.github.andygoossens.modernizer" version "1.7.0" apply false
+    id "com.github.andygoossens.modernizer" version "1.8.0" apply false
 }
 
 repositories {
@@ -186,10 +186,10 @@ Add the following dependency to your Gradle build script:
 
 ```groovy
 // Option 1: compile time dependency (Gradle's old way)
-compile 'org.gaul:modernizer-maven-annotations:2.3.0'
+compile 'org.gaul:modernizer-maven-annotations:2.6.0'
 
 // Option 2: implementation dependency (Gradle's new way)
-implementation 'org.gaul:modernizer-maven-annotations:2.3.0'
+implementation 'org.gaul:modernizer-maven-annotations:2.6.0'
 ```
 
 ## Version comparison
@@ -207,6 +207,7 @@ The table below describes how they relate to each other.
 | 1.5.x                    | 2.2.0                   |
 | 1.6.x                    | 2.3.0                   |
 | 1.7.x                    | 2.5.0                   |
+| 1.8.x                    | 2.6.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
 Specify in the `toolVersion` extension property the version that you want to use. Pay attention:
@@ -244,12 +245,12 @@ However, if it requires changes in Modernizer Maven Plugin, then it is up to its
 
 ```
 Licensed under the Apache License, Version 2.0
-Copyright (C) 2016-2022 Andy Goossens
+Copyright (C) 2016-2023 Andy Goossens
 
 Inspired by, and based upon code from:
 
 Modernizer Maven Plugin
-Copyright (C) 2014-2022 Andrew Gaul
+Copyright (C) 2014-2023 Andrew Gaul
 
 Gradle Docker plugin
 Copyright (C) 2014 the original author or authors.
