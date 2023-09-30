@@ -68,7 +68,7 @@ class ModernizerPlugin implements Plugin<Project> {
     private void configureAbstractModernizerTask(Project project, Configuration configuration,
                                                  ModernizerPluginExtension extension) {
         ModernizerThreadContextClassLoader modernizerClassLoader = new ModernizerThreadContextClassLoader(extension)
-        project.tasks.withType(AbstractModernizerTask) {
+        project.tasks.withType(AbstractModernizerTask).configureEach {
             group = "Verification"
             description = "Detects use of legacy APIs which modern Java versions supersede."
             threadContextClassLoader = modernizerClassLoader
