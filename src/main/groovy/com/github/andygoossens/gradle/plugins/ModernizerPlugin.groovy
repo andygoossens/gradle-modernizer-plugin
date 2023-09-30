@@ -19,6 +19,7 @@ import com.github.andygoossens.gradle.plugins.utils.ModernizerThreadContextClass
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.tasks.TaskProvider
 
 class ModernizerPlugin implements Plugin<Project> {
 
@@ -37,8 +38,7 @@ class ModernizerPlugin implements Plugin<Project> {
         extension.classpath = configuration
 
         configureAbstractModernizerTask(project, configuration, extension)
-        ModernizerTask modernizerTask = createTask(project, extension)
-        addTaskDependencies(project, modernizerTask, extension)
+        createTask(project, extension)
     }
 
     private static Configuration configureConfiguration(Project project) {
@@ -79,27 +79,18 @@ class ModernizerPlugin implements Plugin<Project> {
         }
     }
 
-    private static ModernizerTask createTask(Project project, ModernizerPluginExtension extension) {
-        ModernizerTask modernizerTask = project.tasks.create(TASK_NAME, ModernizerTask)
-        modernizerTask.setExtension(extension)
+    private static void createTask(Project project, ModernizerPluginExtension extension) {
+        TaskProvider<ModernizerTask> taskProvider = project.tasks.register(TASK_NAME, ModernizerTask, task -> {
+            task.extension = extension
+            task.dependsOn('classes')
 
-        modernizerTask
-    }
-
-    private
-    static addTaskDependencies(Project project, ModernizerTask modernizerTask, ModernizerPluginExtension extension) {
-        project.configure(project) {
-            afterEvaluate {
-                modernizerTask.dependsOn('classes')
-                
-                if (extension.includeTestClasses) {
-                    modernizerTask.dependsOn('testClasses')
-                }
-
-                project.getTasksByName('check', false).each {
-                    t -> t.dependsOn(modernizerTask)
-                }
+            if (extension.includeTestClasses) {
+                task.dependsOn('testClasses')
             }
+        })
+
+        project.getTasksByName('check', false).each {t ->
+            t.dependsOn(taskProvider)
         }
     }
 }
