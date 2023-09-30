@@ -28,9 +28,9 @@ To use the plugin, include in your build script:
 plugins {
     // Option A: When your root project has a SourceSet
     // e.g. the root project is applying the java/groovy/kotlin plugin as well 
-    id "com.github.andygoossens.modernizer" version "1.8.0"
+    id "com.github.andygoossens.modernizer" version "1.9.0"
     // Option B: When your root project does not have a SourceSet
-    id "com.github.andygoossens.modernizer" version "1.8.0" apply false
+    id "com.github.andygoossens.modernizer" version "1.9.0" apply false
 }
 
 repositories {
@@ -208,6 +208,7 @@ The table below describes how they relate to each other.
 | 1.6.x                    | 2.3.0                   |
 | 1.7.x                    | 2.5.0                   |
 | 1.8.x                    | 2.6.0                   |
+| 1.9.x                    | 2.7.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
 Specify in the `toolVersion` extension property the version that you want to use. Pay attention:
