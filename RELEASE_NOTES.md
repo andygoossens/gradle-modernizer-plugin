@@ -1,6 +1,7 @@
 ### Next version
 
 * Update Gradle plugin publishing configuration
+* Support Modernizer Maven Plugin 2.7.0
 
 ### Version 1.8.0 (April 13, 2023)
 
