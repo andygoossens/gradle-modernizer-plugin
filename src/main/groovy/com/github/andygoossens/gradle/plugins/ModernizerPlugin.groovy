@@ -72,10 +72,7 @@ class ModernizerPlugin implements Plugin<Project> {
             group = "Verification"
             description = "Detects use of legacy APIs which modern Java versions supersede."
             threadContextClassLoader = modernizerClassLoader
-
-            conventionMapping.with {
-                classpath = { configuration }
-            }
+            classpath = configuration
         }
     }
 
