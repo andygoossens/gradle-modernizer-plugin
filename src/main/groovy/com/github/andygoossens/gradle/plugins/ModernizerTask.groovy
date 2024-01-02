@@ -22,6 +22,7 @@ import org.gaul.modernizer_maven_plugin.Violation
 import org.gradle.api.GradleException
 import org.gradle.api.GradleScriptException
 import org.gradle.api.file.SourceDirectorySet
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.SourceSetOutput
 import org.xml.sax.SAXException
@@ -56,7 +57,8 @@ class ModernizerTask extends AbstractModernizerTask {
         }
 
         if (extension.javaVersion == null) {
-            extension.setJavaVersion(project.targetCompatibility.toString())
+            def targetCompatibility = project.extensions.findByType(JavaPluginExtension)?.targetCompatibility?.toString()
+            extension.setJavaVersion(targetCompatibility)
         }
 
         SourceDirectorySet inputFileCollection = project.sourceSets.main.allJava
