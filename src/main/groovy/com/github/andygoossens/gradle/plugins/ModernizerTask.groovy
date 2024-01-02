@@ -104,12 +104,12 @@ class ModernizerTask extends AbstractModernizerTask {
             def detectionFiles = detectionFileCollection.files
             for (File detectionFile : detectionFiles) {
                 // Ignore classes annotated with org.gaul.modernizer_maven_annotations.SuppressModernize
-                Set<String> suppressedClassNames = suppressDetectMethod.invoke(null, detectionFile)
+                Set<String> suppressedClassNames = suppressDetectMethod.invoke(null, detectionFile) as Set<String>
                 ignoreClassNames.addAll(suppressedClassNames)
                 
                 if (extension.ignoreGeneratedClasses) {
                     // Ignore classes annotated with Generated (does not matter from which package)
-                    Set<String> generatedClassNames = generatedDetectMethod.invoke(null, detectionFile)
+                    Set<String> generatedClassNames = generatedDetectMethod.invoke(null, detectionFile) as Set<String>
                     ignoreClassNames.addAll(generatedClassNames)
                 }
             }
@@ -162,6 +162,7 @@ class ModernizerTask extends AbstractModernizerTask {
                 throw new GradleScriptException("Error opening violation file: $file", fnfe)
             }
         }
+
         try {
             return modernizerClass.parseFromXml(is)
         } catch (IOException ioe) {
@@ -290,15 +291,15 @@ class ModernizerTask extends AbstractModernizerTask {
 
     private emitViolation(String name, occurrence) {
         def message = "$name:${occurrence.lineNumber}: ${occurrence.violation.comment}"
-        if ("error".equals(extension.violationLogLevel)) {
+        if ("error" == extension.violationLogLevel) {
             log.error(message)
-        } else if ("trace".equals(extension.violationLogLevel)) {
+        } else if ("trace" == extension.violationLogLevel) {
             log.trace(message)
-        } else if ("warn".equals(extension.violationLogLevel)) {
+        } else if ("warn" == extension.violationLogLevel) {
             log.warn(message)
-        } else if ("info".equals(extension.violationLogLevel)) {
+        } else if ("info" == extension.violationLogLevel) {
             log.info(message)
-        } else if ("debug".equals(extension.violationLogLevel)) {
+        } else if ("debug" == extension.violationLogLevel) {
             log.debug(message)
         } else {
             throw new IllegalStateException("unexpected log level, was: " + extension.violationLogLevel)
