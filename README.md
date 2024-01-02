@@ -246,7 +246,7 @@ However, if it requires changes in Modernizer Maven Plugin, then it is up to its
 
 ```
 Licensed under the Apache License, Version 2.0
-Copyright (C) 2016-2023 Andy Goossens
+Copyright (C) 2016-2024 Andy Goossens
 
 Inspired by, and based upon code from:
 

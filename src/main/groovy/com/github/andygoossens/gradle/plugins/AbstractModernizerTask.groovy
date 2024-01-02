@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Andy Goossens
+ * Copyright 2016-2024 Andy Goossens
  * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
