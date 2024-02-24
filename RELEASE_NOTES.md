@@ -1,5 +1,7 @@
 ### Next version
 
+### Version 1.9.1 (February 24, 2024)
+
 * Get rid of Gradle's deprecation warnings
 * Build plugin with Gradle 7.6.4
 

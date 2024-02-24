@@ -28,9 +28,9 @@ To use the plugin, include in your build script:
 plugins {
     // Option A: When your root project has a SourceSet
     // e.g. the root project is applying the java/groovy/kotlin plugin as well 
-    id "com.github.andygoossens.modernizer" version "1.9.0"
+    id "com.github.andygoossens.modernizer" version "1.9.1"
     // Option B: When your root project does not have a SourceSet
-    id "com.github.andygoossens.modernizer" version "1.9.0" apply false
+    id "com.github.andygoossens.modernizer" version "1.9.1" apply false
 }
 
 repositories {
