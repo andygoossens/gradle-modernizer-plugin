@@ -30,10 +30,8 @@ class ModernizerPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        Configuration configuration = configureConfiguration(project)
-
         ModernizerPluginExtension extension = createExtension(project)
-        configureDefaultDependencies(project, configuration, extension)
+        Configuration configuration = configureConfiguration(project, extension)
 
         extension.classpath = configuration
 
@@ -41,13 +39,17 @@ class ModernizerPlugin implements Plugin<Project> {
         createTask(project, extension)
     }
 
-    private static Configuration configureConfiguration(Project project) {
-        project.getConfigurations().create(MODERNIZER_CONFIGURATION_NAME)
-            .setVisible(false)
-            .setTransitive(true)
-            .setDescription("The Modernizer libraries to be used for this project.")
+    private static Configuration configureConfiguration(Project project,
+                                                        ModernizerPluginExtension extension) {
+        project.getConfigurations().create(MODERNIZER_CONFIGURATION_NAME, c -> {
+            c.setVisible(false)
+            c.setTransitive(true)
+            c.setDescription("The Modernizer libraries to be used for this project.")
             // avoid CVE warning from upstream dependency. see issue #1
-            .exclude([group: "org.codehaus.plexus", module: "plexus-utils"])
+            c.exclude([group: "org.codehaus.plexus", module: "plexus-utils"])
+            c.defaultDependencies(d ->
+                d.add(project.dependencies.create("org.gaul:modernizer-maven-plugin:${extension.getToolVersion()}")))
+        })
     }
 
     private static ModernizerPluginExtension createExtension(Project project) {
@@ -57,16 +59,8 @@ class ModernizerPlugin implements Plugin<Project> {
         extension
     }
 
-    private static void configureDefaultDependencies(Project project, Configuration configuration,
-                                                     ModernizerPluginExtension extension) {
-        configuration.defaultDependencies { dependencies ->
-            dependencies.add(
-                    project.dependencies.create("org.gaul:modernizer-maven-plugin:${extension.getToolVersion()}"))
-        }
-    }
-
-    private void configureAbstractModernizerTask(Project project, Configuration configuration,
-                                                 ModernizerPluginExtension extension) {
+    private static void configureAbstractModernizerTask(Project project, Configuration configuration,
+                                                        ModernizerPluginExtension extension) {
         ModernizerThreadContextClassLoader modernizerClassLoader = new ModernizerThreadContextClassLoader(extension)
         project.tasks.withType(AbstractModernizerTask).configureEach {
             group = "Verification"
