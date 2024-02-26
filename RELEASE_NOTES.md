@@ -1,5 +1,7 @@
 ### Next version
 
+### Version 1.9.2 (February 26, 2024)
+
 * Lookup 'check' task lazily, fixes 'Project.afterEvaluate(Closure)' issue
 
 ### Version 1.9.1 (February 24, 2024)
