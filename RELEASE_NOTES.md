@@ -1,5 +1,7 @@
 ### Next version
 
+* Lookup 'check' task lazily, fixes 'Project.afterEvaluate(Closure)' issue
+
 ### Version 1.9.1 (February 24, 2024)
 
 * Get rid of Gradle's deprecation warnings

@@ -19,6 +19,7 @@ import com.github.andygoossens.gradle.plugins.utils.ModernizerThreadContextClass
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.TaskProvider
 
 class ModernizerPlugin implements Plugin<Project> {
@@ -80,8 +81,10 @@ class ModernizerPlugin implements Plugin<Project> {
             }
         })
 
-        project.getTasksByName('check', false).each {t ->
-            t.dependsOn(taskProvider)
-        }
+        project.plugins.withType(JavaBasePlugin.class).configureEach(p ->
+            project.tasks.named(JavaBasePlugin.CHECK_TASK_NAME, t ->
+                t.dependsOn(taskProvider)
+            )
+        )
     }
 }
