@@ -20,7 +20,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 
-import static java.util.Collections.emptyList
+import static java.util.Collections.emptyList 
 
 class ModernizerPluginExtension {
 
@@ -136,4 +136,20 @@ class ModernizerPluginExtension {
      */
     @Input
     boolean skip = false
+
+    FileCollection mainSourceDirectories
+    FileCollection mainOutputDirectories
+    FileCollection testSourceDirectories
+    FileCollection testOutputDirectories
+    
+    ModernizerPluginExtension(FileCollection mainSourceDirectories, FileCollection mainOutputDirectories,
+                              FileCollection testSourceDirectories, FileCollection testOutputDirectories,
+                              String javaVersion, String toolVersion) {
+        this.mainSourceDirectories = mainSourceDirectories
+        this.mainOutputDirectories = mainOutputDirectories
+        this.testSourceDirectories = testSourceDirectories
+        this.testOutputDirectories = testOutputDirectories
+        this.javaVersion = javaVersion
+        this.toolVersion = toolVersion
+    }
 }

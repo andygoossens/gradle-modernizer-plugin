@@ -19,8 +19,12 @@ import com.github.andygoossens.gradle.plugins.utils.ModernizerThreadContextClass
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.FileCollection
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaBasePlugin
-import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.TaskProvider 
 
 class ModernizerPlugin implements Plugin<Project> {
 
@@ -31,6 +35,8 @@ class ModernizerPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+        project.getPluginManager().apply(JavaPlugin.class)
+        
         ModernizerPluginExtension extension = createExtension(project)
         Configuration configuration = configureConfiguration(project, extension)
 
@@ -54,10 +60,21 @@ class ModernizerPlugin implements Plugin<Project> {
     }
 
     private static ModernizerPluginExtension createExtension(Project project) {
-        ModernizerPluginExtension extension = project.extensions.create(EXTENSION_NAME, ModernizerPluginExtension)
-        extension.setToolVersion(MODERNIZER_DEFAULT_VERSION)
+        JavaPluginExtension javaPluginExtension = project.getExtensions().getByType(JavaPluginExtension.class)
+        String javaVersion = javaPluginExtension.targetCompatibility?.toString()
 
-        extension
+        SourceSet mainSourceSet = javaPluginExtension.getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+        FileCollection mainSourceDirectories = mainSourceSet.allSource.sourceDirectories
+        FileCollection mainOutputDirectories = mainSourceSet.output.classesDirs
+
+        SourceSet testSourceSet = javaPluginExtension.getSourceSets().getByName(SourceSet.TEST_SOURCE_SET_NAME)
+        FileCollection testSourceDirectories = testSourceSet.allSource.sourceDirectories
+        FileCollection testOutputDirectories = testSourceSet.output.classesDirs
+        
+        project.extensions.create(EXTENSION_NAME, ModernizerPluginExtension,
+            mainSourceDirectories, mainOutputDirectories,
+            testSourceDirectories, testOutputDirectories,
+            javaVersion, MODERNIZER_DEFAULT_VERSION)
     }
 
     private static void configureAbstractModernizerTask(Project project, Configuration configuration,
@@ -74,10 +91,10 @@ class ModernizerPlugin implements Plugin<Project> {
     private static void createTask(Project project, ModernizerPluginExtension extension) {
         TaskProvider<ModernizerTask> taskProvider = project.tasks.register(TASK_NAME, ModernizerTask, task -> {
             task.extension = extension
-            task.dependsOn('classes')
+            task.dependsOn(JavaPlugin.CLASSES_TASK_NAME)
 
             if (extension.includeTestClasses) {
-                task.dependsOn('testClasses')
+                task.dependsOn(JavaPlugin.TEST_CLASSES_TASK_NAME)
             }
         })
 

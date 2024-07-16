@@ -21,10 +21,8 @@ import groovy.util.logging.Slf4j
 import org.gaul.modernizer_maven_plugin.Violation
 import org.gradle.api.GradleException
 import org.gradle.api.GradleScriptException
-import org.gradle.api.file.SourceDirectorySet
-import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.SourceSetOutput
 import org.xml.sax.SAXException
 
 import javax.xml.parsers.ParserConfigurationException
@@ -56,17 +54,6 @@ class ModernizerTask extends AbstractModernizerTask {
             return
         }
 
-        if (extension.javaVersion == null) {
-            def targetCompatibility = project.extensions.findByType(JavaPluginExtension)?.targetCompatibility?.toString()
-            extension.setJavaVersion(targetCompatibility)
-        }
-
-        SourceDirectorySet inputFileCollection = project.sourceSets.main.allJava
-        SourceDirectorySet testInputFileCollection = project.sourceSets.test.allJava
-
-        SourceSetOutput outputFileCollection = project.sourceSets.main.output
-        SourceSetOutput testOutputFileCollection = project.sourceSets.test.output
-
         def modernizerClass = threadContextClassLoader.loadClass(MODERNIZER_CLASS)
 
         Map<String, Violation> allViolations = parseViolations(modernizerClass, extension.violationsFile)
@@ -96,9 +83,9 @@ class ModernizerTask extends AbstractModernizerTask {
         def generatedDetectMethod = generatedDetectorClass.getDeclaredMethod("detect", File.class)
         Set<String> ignoreClassNames = new HashSet<String>()
         try {
-            def detectionFileCollection = outputFileCollection.classesDirs
+            def detectionFileCollection = extension.mainOutputDirectories
             if (extension.includeTestClasses) {
-                detectionFileCollection += testOutputFileCollection.classesDirs
+                detectionFileCollection += extension.testOutputDirectories
             }
 
             def detectionFiles = detectionFileCollection.files
@@ -131,19 +118,19 @@ class ModernizerTask extends AbstractModernizerTask {
                 allExclusionPatterns, extension.ignorePackages, ignoreClassNames, allIgnoreClassNamePatterns)
 
         try {
-            long count = recurseFileCollection(inputFileCollection, outputFileCollection)
+            long count = recurseFileCollection(extension.mainSourceDirectories, extension.mainOutputDirectories)
             if (extension.includeTestClasses) {
-                count += recurseFileCollection(testInputFileCollection, testOutputFileCollection)
+                count += recurseFileCollection(extension.testSourceDirectories, extension.testOutputDirectories)
             }
             if (extension.failOnViolations && count != 0) {
                 throw new GradleException("Found $count violations")
             }
         } catch (IOException ioe) {
-            throw new GradleScriptException("Error reading Java classes", ioe)
+            throw new GradleScriptException("Error reading classes", ioe)
         }
     }
 
-    private Map<String, Violation> parseViolations(Class modernizerClass, String violationsFilePath) {
+    private static Map<String, Violation> parseViolations(Class modernizerClass, String violationsFilePath) {
         InputStream is
         if (violationsFilePath.startsWith(CLASSPATH_PREFIX)) {
             String classpath =
@@ -198,16 +185,16 @@ class ModernizerTask extends AbstractModernizerTask {
         }
     }
 
-    private long recurseFileCollection(SourceDirectorySet sourceDirectorySet, SourceSetOutput sourceSetOutput) throws IOException {
+    private long recurseFileCollection(FileCollection sourceDirectories, FileCollection outputDirectories) throws IOException {
         long count = 0
-        for (File classDir : sourceSetOutput.classesDirs) {
-            count += recurseDirectories(sourceDirectorySet, classDir, classDir)
+        for (File outputDirectory : outputDirectories.files) {
+            count += recurseDirectories(sourceDirectories, outputDirectory, outputDirectory)
         }
 
         return count
     }
 
-    private long recurseDirectories(SourceDirectorySet sourceDirectorySet, File outputDirectory, File outputFile) throws IOException {
+    private long recurseDirectories(FileCollection sourceDirectories, File outputDirectory, File outputFile) throws IOException {
         long count = 0
         if (!outputFile.exists()) {
             return count
@@ -215,17 +202,17 @@ class ModernizerTask extends AbstractModernizerTask {
             String[] children = outputFile.list()
             if (children != null) {
                 for (String child : children) {
-                    count += recurseDirectories(sourceDirectorySet, outputDirectory, new File(outputFile, child))
+                    count += recurseDirectories(sourceDirectories, outputDirectory, new File(outputFile, child))
                 }
             }
         } else {
-            count += processFile(sourceDirectorySet, outputDirectory, outputFile)
+            count += processFile(sourceDirectories, outputDirectory, outputFile)
         }
 
         return count
     }
 
-    private long processFile(SourceDirectorySet sourceDirectorySet, File outputDirectory, File outputFile) throws IOException {
+    private long processFile(FileCollection sourceDirectories, File outputDirectory, File outputFile) throws IOException {
         long count = 0
         if (!outputFile.exists()) {
             return count
@@ -236,7 +223,7 @@ class ModernizerTask extends AbstractModernizerTask {
             try {
                 Collection occurrences = modernizer.check(is)
                 for (def occurrence : occurrences) {
-                    String sourceFile = findSourceFile(sourceDirectorySet, outputDirectory, outputFile)
+                    String sourceFile = findSourceFile(sourceDirectories, outputDirectory, outputFile)
                     emitViolation(sourceFile, occurrence)
 
                     ++count
@@ -249,7 +236,7 @@ class ModernizerTask extends AbstractModernizerTask {
         return count
     }
 
-    private static String findSourceFile(SourceDirectorySet sourceDirectorySet, File outputDirectory, File outputFile) {
+    private static String findSourceFile(FileCollection sourceDirectories, File outputDirectory, File outputFile) {
         String name = outputFile.getPath()
 
         Path outputFilePath = outputFile.toPath()
@@ -257,7 +244,7 @@ class ModernizerTask extends AbstractModernizerTask {
         Path relativePath = outputDirectoryPath.relativize(outputFilePath)
 
         List<String> possibleSourceFiles = getPossibleSourceFiles(relativePath.toString())
-        for (File sourceDir : sourceDirectorySet.srcDirs) {
+        for (File sourceDir : sourceDirectories.files) {
             for (String possibleSourceFile : possibleSourceFiles) {
                 Path possibleSourcePath = Paths.get(sourceDir.absolutePath, possibleSourceFile)
                 if (Files.exists(possibleSourcePath)) {
