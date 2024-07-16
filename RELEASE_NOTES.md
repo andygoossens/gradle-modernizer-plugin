@@ -1,5 +1,7 @@
 ### Next version
 
+### Version 1.9.3 (July 16, 2024)
+
 * Support Gradle's configuration cache
 
 ### Version 1.9.2 (February 26, 2024)
