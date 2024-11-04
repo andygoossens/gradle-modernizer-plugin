@@ -1,5 +1,7 @@
 ### Next version
 
+* Support Modernizer Maven Plugin 2.9.0
+
 ### Version 1.9.3 (July 16, 2024)
 
 * Support Gradle's configuration cache
