@@ -163,7 +163,7 @@ modernizer {
 
 This is a list of full qualified class names (incl. package) to ignore.
 Each exclusion should be a regular expression that matches a package and/or class;
-the package will be / not . separated (ASM's format).
+the package name will be slash-separated, not dot-separated ([ASM's format](https://asm.ow2.io/faq.html#Q7)).
 
 Example:
 ```groovy
@@ -177,9 +177,8 @@ modernizer {
 ### Ignoring elements
 
 You cannot only ignore elements by using extension properties (see above), you
-can indicate that violations within a class or method should be ignored by
-the plugin by adding `@SuppressModernizer` to the element you'd like
-to ignore:
+can indicate that the plugin should ignore violations within a class or method
+by adding `@SuppressModernizer` to the element you'd like to ignore:
 
 ```java
 import org.gaul.modernizer_maven_annotations.SuppressModernizer;
@@ -229,17 +228,17 @@ Pay attention: This might break when there is an API change!
 ### I found an undetected case of legacy API. Can you add a new violation rule?
 
 Sounds great! However, I cannot add it myself as
-[Modernizer Maven Plugin](https://github.com/gaul/modernizer-maven-plugin) maintains the list of violations rules.
+[Modernizer Maven Plugin](https://github.com/gaul/modernizer-maven-plugin) maintains the list of violation rules.
 Open an issue there and describe what you found.
 
 Note that it might take some time for them to release a new version with your rule.
 
-### There is a new version of Modernizer Maven Plugin but there is no corresponding version of your plugin.
+### There is a new version of Modernizer Maven Plugin, but there is no corresponding version of your plugin.
 
 That is not a question. Unfortunately, I might not have found the time to release a new version of the Gradle plugin.
 
 In the meanwhile you can specify the desired version in the `toolVersion` extension property.
-The Gradle plugin will then pickup the requested version and, if the API is still the same, use it.
+The Gradle plugin will then pick up the requested version and, if the API is still the same, use it.
 
 ```groovy
 modernizer {
