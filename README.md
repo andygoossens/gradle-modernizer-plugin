@@ -28,9 +28,9 @@ To use the plugin, include in your build script:
 plugins {
     // Option A: When your root project has a SourceSet
     // e.g. the root project is applying the java/groovy/kotlin plugin as well 
-    id "com.github.andygoossens.modernizer" version "1.10.0"
+    id "com.github.andygoossens.modernizer" version "1.11.0"
     // Option B: When your root project does not have a SourceSet
-    id "com.github.andygoossens.modernizer" version "1.10.0" apply false
+    id "com.github.andygoossens.modernizer" version "1.11.0" apply false
 }
 
 repositories {
@@ -193,10 +193,10 @@ Add the following dependency to your Gradle build script:
 
 ```groovy
 // Option 1: compile time dependency (Gradle's old way)
-compile 'org.gaul:modernizer-maven-annotations:2.6.0'
+compile 'org.gaul:modernizer-maven-annotations:3.1.0'
 
 // Option 2: implementation dependency (Gradle's new way)
-implementation 'org.gaul:modernizer-maven-annotations:2.6.0'
+implementation 'org.gaul:modernizer-maven-annotations:3.1.0'
 ```
 
 ## Version comparison
@@ -217,6 +217,7 @@ The table below describes how they relate to each other.
 | 1.8.x                    | 2.6.0                   |
 | 1.9.x                    | 2.7.0                   |
 | 1.10.0                   | 2.9.0                   |
+| 1.11.0                   | 3.1.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
 Specify the desired version in the `toolVersion` extension property.
@@ -242,7 +243,7 @@ The Gradle plugin will then pick up the requested version and, if the API is sti
 
 ```groovy
 modernizer {
-    toolVersion = '1.10.0'
+    toolVersion = '3.1.0'
 }
 ```
 
