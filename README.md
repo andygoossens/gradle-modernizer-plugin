@@ -260,12 +260,12 @@ However, if it requires changes in Modernizer Maven Plugin, then it is up to its
 
 ```
 Licensed under the Apache License, Version 2.0
-Copyright (C) 2016-2024 Andy Goossens
+Copyright (C) 2016-2025 Andy Goossens
 
 Inspired by, and based upon code from:
 
 Modernizer Maven Plugin
-Copyright (C) 2014-2023 Andrew Gaul
+Copyright (C) 2014-2025 Andrew Gaul
 
 Gradle Docker plugin
 Copyright (C) 2014 the original author or authors.

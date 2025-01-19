@@ -78,9 +78,9 @@ class ModernizerTask extends AbstractModernizerTask {
         }
 
         def suppressDetectorClass = threadContextClassLoader.loadClass(SUPPRESS_DETECTOR_CLASS)
-        def suppressDetectMethod = suppressDetectorClass.getDeclaredMethod("detect", File.class)
+        def suppressDetectMethod = suppressDetectorClass.getDeclaredMethod("detect", Path.class)
         def generatedDetectorClass = threadContextClassLoader.loadClass(GENERATOR_DETECTOR_CLASS)
-        def generatedDetectMethod = generatedDetectorClass.getDeclaredMethod("detect", File.class)
+        def generatedDetectMethod = generatedDetectorClass.getDeclaredMethod("detect", Path.class)
         Set<String> ignoreClassNames = new HashSet<String>()
         try {
             def detectionFileCollection = extension.mainOutputDirectories
@@ -91,12 +91,13 @@ class ModernizerTask extends AbstractModernizerTask {
             def detectionFiles = detectionFileCollection.files
             for (File detectionFile : detectionFiles) {
                 // Ignore classes annotated with org.gaul.modernizer_maven_annotations.SuppressModernize
-                Set<String> suppressedClassNames = suppressDetectMethod.invoke(null, detectionFile) as Set<String>
+                Path detectionPath = detectionFile.toPath() 
+                Set<String> suppressedClassNames = suppressDetectMethod.invoke(null, detectionPath) as Set<String>
                 ignoreClassNames.addAll(suppressedClassNames)
                 
                 if (extension.ignoreGeneratedClasses) {
                     // Ignore classes annotated with Generated (does not matter from which package)
-                    Set<String> generatedClassNames = generatedDetectMethod.invoke(null, detectionFile) as Set<String>
+                    Set<String> generatedClassNames = generatedDetectMethod.invoke(null, detectionPath) as Set<String>
                     ignoreClassNames.addAll(generatedClassNames)
                 }
             }

@@ -1,5 +1,7 @@
 ### Next version
 
+* Support for Modernizer Maven Plugin 3.1.0 and its new API
+
 ### Version 1.10.0 (November 4, 2024)
 
 * Support Modernizer Maven Plugin 2.9.0
