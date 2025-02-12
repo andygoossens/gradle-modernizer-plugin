@@ -21,7 +21,10 @@ so that the same functionality is now available in Gradle builds.
 
 ## Usage
 
-To use the plugin, include in your build script:
+To use the plugin, include in your build script.
+
+<details>
+  <summary>Groovy DSL</summary>
 
 ```groovy
 // You need to do this only once
@@ -37,26 +40,65 @@ repositories {
     mavenCentral()
 }
 
+// Apply the plugin
+
 // Option 1: Apply the plugin in each project where you want to use it
 // Gradle's old way:
-apply plugin: 'com.github.andygoossens.modernizer'
+apply plugin: "com.github.andygoossens.modernizer"
 // Gradle's new way:
 plugins {
-    id 'com.github.andygoossens.modernizer'
+    id "com.github.andygoossens.modernizer"
 }
 
 // Option 2: Apply the plugin in all projects (even in the root project)
 //           Preferably used with option A (= not mentioning 'apply false')
 allprojects {
-    apply plugin: 'com.github.andygoossens.modernizer'
+    apply plugin: "com.github.andygoossens.modernizer"
 }
 
-// Option 3: Apply the plugin in all sub-projects (but not the root project)
+// Option 3: Apply the plugin in all subprojects (but not the root project)
 //           Preferably used with option B (= mentioning 'apply false')
 subprojects {
-    apply plugin: 'com.github.andygoossens.modernizer'
+    apply plugin: "com.github.andygoossens.modernizer"
 }
 ```
+</details>
+
+<details>
+  <summary>Kotlin DSL</summary>
+
+```kotlin
+// You need to do this only once
+plugins {
+    // Option A: When your root project has a SourceSet
+    // e.g., the root project is applying the java/groovy/kotlin plugin as well 
+    id("com.github.andygoossens.modernizer") version "1.11.0"
+    // Option B: When your root project does not have a SourceSet
+    id("com.github.andygoossens.modernizer") version "1.11.0" apply false
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Apply the plugin
+
+// Option 1: Apply the plugin in each project where you want to use it
+plugins.apply("com.github.andygoossens.modernizer")
+
+// Option 2: Apply the plugin in all projects (even in the root project)
+//           Preferably used with option A (= not mentioning 'apply false')
+allprojects {
+    plugins.apply("com.github.andygoossens.modernizer")
+}
+
+// Option 3: Apply the plugin in all subprojects (but not the root project)
+//           Preferably used with option B (= mentioning 'apply false')
+subprojects {
+    plugins.apply("com.github.andygoossens.modernizer")
+}
+```
+</details>
 
 If you are still using the old plugin id `com.github.andygoossens.gradle-modernizer-plugin` then
 please switch to `com.github.andygoossens.modernizer` instead.
@@ -118,7 +160,9 @@ sun/misc/BASE64Decoder.decodeBuffer:(Ljava/lang/String;)[B
 
 This is a list of exclusions. Each exclusion should be in the javap format.
 
-Example:
+<details>
+  <summary>Groovy DSL example</summary>
+
 ```groovy
 modernizer {
     exclusions = [
@@ -128,13 +172,31 @@ modernizer {
     ]
 }
 ```
+</details>
+
+<details>
+  <summary>Kotlin DSL example</summary>
+
+```kotlin
+modernizer {
+    exclusions = setOf(
+        "java/lang/String.getBytes:(Ljava/lang/String;)[B",
+        "com/google/common/base/Function",
+        "sun/misc/BASE64Decoder.decodeBuffer:(Ljava/lang/String;)[B",
+    )
+}
+```
+</details>
+
 
 ##### exclusionPatterns
 
 This is a list of exclusion patterns. Each exclusion should be a regular
 expression that matches the javap format of a violation.
 
-Example:
+<details>
+  <summary>Groovy DSL example</summary>
+
 ```groovy
 modernizer {
     exclusionPatterns = [
@@ -142,6 +204,19 @@ modernizer {
     ]
 }
 ```
+</details>
+
+<details>
+  <summary>Kotlin DSL example</summary>
+
+```kotlin
+modernizer {
+    exclusionPatterns = setOf(
+        "java/lang/.*",
+    )
+}
+```
+</details>
 
 ##### ignorePackages
 
@@ -150,7 +225,9 @@ This is a list of package prefixes for which no violations will be reported.
 Ignoring a package will ignore all its children.
 Specifying `foo.bar` subsequently ignores `foo.bar.*`, `foo.bar.baz.*` and so on.
 
-Example:
+<details>
+  <summary>Groovy DSL example</summary>
+
 ```groovy
 modernizer {
     ignorePackages = [
@@ -158,6 +235,20 @@ modernizer {
     ]
 }
 ```
+</details>
+
+<details>
+  <summary>Kotlin DSL example</summary>
+
+```kotlin
+modernizer {
+    ignorePackages = setOf(
+        "com.github.andygoossens",
+    )
+}
+```
+</details>
+
 
 ##### ignoreClassNamePatterns
 
@@ -165,7 +256,9 @@ This is a list of full qualified class names (incl. package) to ignore.
 Each exclusion should be a regular expression that matches a package and/or class;
 the package name will be slash-separated, not dot-separated ([ASM's format](https://asm.ow2.io/faq.html#Q7)).
 
-Example:
+<details>
+  <summary>Groovy DSL example</summary>
+
 ```groovy
 modernizer {
     ignoreClassNamePatterns = [
@@ -173,6 +266,20 @@ modernizer {
     ]
 }
 ```
+</details>
+
+<details>
+  <summary>Kotlin DSL example</summary>
+
+```kotlin
+modernizer {
+    ignoreClassNamePatterns = setOf(
+        ".*MyLegacyClass",
+    )
+}
+```
+</details>
+
 
 ### Ignoring elements
 
@@ -192,11 +299,7 @@ public class Example {
 Add the following dependency to your Gradle build script:
 
 ```groovy
-// Option 1: compile time dependency (Gradle's old way)
-compile 'org.gaul:modernizer-maven-annotations:3.1.0'
-
-// Option 2: implementation dependency (Gradle's new way)
-implementation 'org.gaul:modernizer-maven-annotations:3.1.0'
+implementation "org.gaul:modernizer-maven-annotations:3.1.0"
 ```
 
 ## Version comparison
@@ -243,7 +346,7 @@ The Gradle plugin will then pick up the requested version and, if the API is sti
 
 ```groovy
 modernizer {
-    toolVersion = '3.1.0'
+    toolVersion = "3.1.0"
 }
 ```
 
