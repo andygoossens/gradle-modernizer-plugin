@@ -29,7 +29,7 @@ import org.gradle.api.tasks.TaskProvider
 class ModernizerPlugin implements Plugin<Project> {
 
     public static final String MODERNIZER_CONFIGURATION_NAME = 'modernizer'
-    public static final String MODERNIZER_DEFAULT_VERSION = '3.1.0'
+    public static final String MODERNIZER_DEFAULT_VERSION = '3.2.0'
     public static final String EXTENSION_NAME = 'modernizer'
     public static final String TASK_NAME = 'modernizer'
 
