@@ -1,5 +1,7 @@
 ### Next version
 
+### Version 1.13.0 (March 21, 2026)
+
 * Support for Modernizer Maven Plugin 3.3.0
 
 ### Version 1.12.0 (October 3, 2025)
