@@ -2,7 +2,7 @@ gradlePlugin {
     website = 'https://github.com/andygoossens/gradle-modernizer-plugin'
     vcsUrl = 'https://github.com/andygoossens/gradle-modernizer-plugin'
     plugins {
-        modernizerPlugin {
+        create("modernizerPlugin") {
             id = 'com.github.andygoossens.modernizer'
             implementationClass = 'com.github.andygoossens.gradle.plugins.ModernizerPlugin'
             displayName = 'Gradle Modernizer plugin'
@@ -11,7 +11,7 @@ gradlePlugin {
         }
         // Avoid using this for new projects.
         // TODO: Should show a 'deprecated' warning somehow.
-        legacyIdModernizerPlugin {
+        create("legacyIdModernizerPlugin") {
             id = 'com.github.andygoossens.gradle-modernizer-plugin'
             implementationClass = 'com.github.andygoossens.gradle.plugins.ModernizerPlugin'
             displayName = 'Gradle Modernizer plugin'
