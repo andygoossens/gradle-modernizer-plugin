@@ -21,7 +21,3 @@ java {
         languageVersion = JavaLanguageVersion.of(8)
     }
 }
-
-wrapper {
-    distributionType = Wrapper.DistributionType.ALL
-}
