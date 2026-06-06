@@ -132,27 +132,28 @@ class ModernizerTask extends AbstractModernizerTask {
         }
     }
 
-    private static Map<String, Violation> parseViolations(Class modernizerClass, String violationsFilePath) {
-        InputStream is
+    private static InputStream openViolationsInputStream(String violationsFilePath, Class modernizerClass) {
         if (violationsFilePath.startsWith(CLASSPATH_PREFIX)) {
-            String classpath =
-                    violationsFilePath.substring(CLASSPATH_PREFIX.length())
+            String classpath = violationsFilePath.substring(CLASSPATH_PREFIX.length())
             if (!classpath.startsWith("/")) {
                 throw new IllegalArgumentException(format(
-                        "Only absolute classpath references are allowed, got [%s]",
-                        classpath))
+                    "Only absolute classpath references are allowed, got [%s]",
+                    classpath))
             }
-            is = modernizerClass.getResourceAsStream(classpath)
+            
+            return modernizerClass.getResourceAsStream(classpath)
         } else {
             File file = new File(violationsFilePath)
             try {
-                is = new FileInputStream(file)
+                return new FileInputStream(file)
             } catch (FileNotFoundException fnfe) {
                 throw new GradleScriptException("Error opening violation file: $file", fnfe)
             }
         }
+    }
 
-        try {
+    private static Map<String, Violation> parseViolations(Class modernizerClass, String violationsFilePath) {
+        try (InputStream is = openViolationsInputStream(violationsFilePath, modernizerClass)) {
             return modernizerClass.parseFromXml(is)
         } catch (IOException ioe) {
             throw new GradleScriptException("Error reading violation data", ioe)
@@ -160,30 +161,28 @@ class ModernizerTask extends AbstractModernizerTask {
             throw new GradleScriptException("Error parsing violation data", pce)
         } catch (SAXException saxe) {
             throw new GradleScriptException("Error parsing violation data", saxe)
-        } finally {
-            StreamUtils.closeQuietly(is)
         }
     }
 
-    private Collection<String> readExclusionsFile(String exclusionsFilePath) {
-        InputStream is = null
-        try {
-            File file = new File(exclusionsFilePath)
-            if (file.exists()) {
-                is = new FileInputStream(exclusionsFilePath)
-            } else {
-                is = this.getClass().getClassLoader().getResourceAsStream(
-                        exclusionsFilePath)
-            }
+    private InputStream openExclusionsInputStream(String exclusionsFilePath) {
+        File file = new File(exclusionsFilePath)
+        if (file.exists()) {
+            return new FileInputStream(exclusionsFilePath)
+        } else {
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream(exclusionsFilePath)
             if (is == null) {
                 throw new GradleException("Could not find exclusion file: $extension.exclusionsFile")
             }
 
+            return is
+        }
+    }
+
+    private Collection<String> readExclusionsFile(String exclusionsFilePath) {
+        try (InputStream is = openExclusionsInputStream(exclusionsFilePath)) {
             return StreamUtils.readAllLines(is)
         } catch (IOException ioe) {
             throw new GradleScriptException("Error reading exclusion file: $extension.exclusionsFile", ioe)
-        } finally {
-            StreamUtils.closeQuietly(is)
         }
     }
 
