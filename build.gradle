@@ -13,7 +13,7 @@ group = 'com.github.andygoossens'
 version = '1.13.1-SNAPSHOT'
 
 dependencies {
-    compileOnly 'org.gaul:modernizer-maven-plugin:3.3.0'
+    compileOnly 'org.gaul:modernizer-maven-plugin:3.4.0'
 }
 
 java {
