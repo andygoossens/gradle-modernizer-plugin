@@ -116,7 +116,8 @@ class ModernizerTask extends AbstractModernizerTask {
         }
 
         modernizer = modernizerClass.newInstance(extension.javaVersion, allViolations, allExclusions,
-                allExclusionPatterns, extension.ignorePackages, ignoreClassNames, allIgnoreClassNamePatterns)
+                allExclusionPatterns, extension.ignorePackages, ignoreClassNames, allIgnoreClassNamePatterns,
+                extension.ignoreGeneratedClasses)
 
         try {
             long count = recurseFileCollection(extension.mainSourceDirectories, extension.mainOutputDirectories)
