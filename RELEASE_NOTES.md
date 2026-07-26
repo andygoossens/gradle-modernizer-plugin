@@ -1,5 +1,7 @@
 ### Next version
 
+* Support Gradle's configuration cache
+
 ### Version 1.15.0 (July 26, 2026)
 
 * Fix detection of Java version

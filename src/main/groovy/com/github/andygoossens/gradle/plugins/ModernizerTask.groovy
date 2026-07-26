@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Andy Goossens
+ * Copyright 2016-2026 Andy Goossens
  * Copyright 2014-2018 Andrew Gaul
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +21,16 @@ import groovy.util.logging.Slf4j
 import org.gaul.modernizer_maven_plugin.Violation
 import org.gradle.api.GradleException
 import org.gradle.api.GradleScriptException
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
-import org.gradle.api.tasks.Internal
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.xml.sax.SAXException
 
 import javax.xml.parsers.ParserConfigurationException
@@ -35,40 +43,83 @@ import java.util.regex.PatternSyntaxException
 import static java.lang.String.format
 
 @Slf4j
-class ModernizerTask extends AbstractModernizerTask {
+abstract class ModernizerTask extends AbstractModernizerTask {
 
     private static final String CLASSPATH_PREFIX = "classpath:"
     private static final String MODERNIZER_CLASS = "org.gaul.modernizer_maven_plugin.Modernizer"
     private static final String SUPPRESS_DETECTOR_CLASS = "org.gaul.modernizer_maven_plugin.SuppressModernizerAnnotationDetector"
     private static final String GENERATOR_DETECTOR_CLASS = "org.gaul.modernizer_maven_plugin.SuppressGeneratedAnnotationDetector"
 
-    @Internal
-    ModernizerPluginExtension extension
+    @Input
+    abstract Property<String> getToolVersion()
+    @Input
+    abstract Property<String> getJavaVersion()
+    @Input
+    abstract Property<Boolean> getFailOnViolations()
+    @Input
+    abstract Property<Boolean> getIncludeTestClasses()
+    @Input
+    abstract Property<String> getViolationsFile()
+    @Input
+    abstract ListProperty<String> getViolationsFiles()
+    @Input
+    @Optional
+    abstract Property<String> getExclusionsFile()
+    @Input
+    abstract Property<String> getViolationLogLevel()
+    @Input
+    abstract Property<Boolean> getIgnoreGeneratedClasses()
+    @Input
+    abstract SetProperty<String> getExclusions()
+    @Input
+    abstract SetProperty<String> getExclusionPatterns()
+    @Input
+    abstract SetProperty<String> getIgnorePackages()
+    @Input
+    abstract SetProperty<String> getIgnoreClassNamePatterns()
+    @Input
+    abstract Property<Boolean> getSkip()
+    @InputFiles
+    @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract ConfigurableFileCollection getMainSourceDirectories()
+    @InputFiles
+    @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract ConfigurableFileCollection getMainOutputDirectories()
+    @InputFiles
+    @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract ConfigurableFileCollection getTestSourceDirectories()
+    @InputFiles
+    @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract ConfigurableFileCollection getTestOutputDirectories()
 
     private def modernizer
 
     @Override
     void run(Object closure) {
-        if (extension.skip) {
+        if (getSkip().get()) {
             log.info('Skipping modernizer execution')
             return
         }
 
         def modernizerClass = threadContextClassLoader.loadClass(MODERNIZER_CLASS)
 
-        Map<String, Violation> allViolations = parseViolations(modernizerClass, extension.violationsFile)
-        for (String violationsFilePath : extension.violationsFiles) {
+        Map<String, Violation> allViolations = parseViolations(modernizerClass, getViolationsFile().get())
+        for (String violationsFilePath : getViolationsFiles().get()) {
             allViolations.putAll(parseViolations(modernizerClass, violationsFilePath))
         }
 
         Set<String> allExclusions = new HashSet<String>()
-        allExclusions.addAll(extension.exclusions)
-        if (extension.exclusionsFile != null) {
-            allExclusions.addAll(readExclusionsFile(extension.exclusionsFile))
+        allExclusions.addAll(getExclusions().get())
+        if (getExclusionsFile().isPresent()) {
+            allExclusions.addAll(readExclusionsFile(getExclusionsFile().get()))
         }
 
         Set<Pattern> allExclusionPatterns = new HashSet<Pattern>()
-        for (String pattern : extension.exclusionPatterns) {
+        for (String pattern : getExclusionPatterns().get()) {
             try {
                 allExclusionPatterns.add(Pattern.compile(pattern))
             } catch (PatternSyntaxException pse) {
@@ -83,9 +134,9 @@ class ModernizerTask extends AbstractModernizerTask {
         def generatedDetectMethod = generatedDetectorClass.getDeclaredMethod("detect", Path.class)
         Set<String> ignoreClassNames = new HashSet<String>()
         try {
-            def detectionFileCollection = extension.mainOutputDirectories
-            if (extension.includeTestClasses) {
-                detectionFileCollection += extension.testOutputDirectories
+            def detectionFileCollection = mainOutputDirectories
+            if (getIncludeTestClasses().get()) {
+                detectionFileCollection += testOutputDirectories
             }
 
             def detectionFiles = detectionFileCollection.files
@@ -95,18 +146,18 @@ class ModernizerTask extends AbstractModernizerTask {
                 Set<String> suppressedClassNames = suppressDetectMethod.invoke(null, detectionPath) as Set<String>
                 ignoreClassNames.addAll(suppressedClassNames)
                 
-                if (extension.ignoreGeneratedClasses) {
+                if (getIgnoreGeneratedClasses().get()) {
                     // Ignore classes annotated with Generated (does not matter from which package)
                     Set<String> generatedClassNames = generatedDetectMethod.invoke(null, detectionPath) as Set<String>
                     ignoreClassNames.addAll(generatedClassNames)
                 }
             }
         } catch (IOException e) {
-            throw new GradleScriptException("Error reading suppressions", e);
+            throw new GradleScriptException("Error reading suppressions", e)
         }
 
         Set<Pattern> allIgnoreClassNamePatterns = new HashSet<Pattern>()
-        for (String pattern : extension.ignoreClassNamePatterns) {
+        for (String pattern : getIgnoreClassNamePatterns().get()) {
             try {
                 allIgnoreClassNamePatterns.add(Pattern.compile(pattern))
             } catch (PatternSyntaxException pse) {
@@ -115,16 +166,16 @@ class ModernizerTask extends AbstractModernizerTask {
             }
         }
 
-        modernizer = modernizerClass.newInstance(extension.javaVersion.get(), allViolations, allExclusions,
-                allExclusionPatterns, extension.ignorePackages, ignoreClassNames, allIgnoreClassNamePatterns,
-                extension.ignoreGeneratedClasses)
+        modernizer = modernizerClass.newInstance(getJavaVersion().get(), allViolations, allExclusions,
+                allExclusionPatterns, getIgnorePackages().get(), ignoreClassNames, allIgnoreClassNamePatterns,
+                getIgnoreGeneratedClasses().get())
 
         try {
-            long count = recurseFileCollection(extension.mainSourceDirectories, extension.mainOutputDirectories)
-            if (extension.includeTestClasses) {
-                count += recurseFileCollection(extension.testSourceDirectories, extension.testOutputDirectories)
+            long count = recurseFileCollection(mainSourceDirectories, mainOutputDirectories)
+            if (getIncludeTestClasses().get()) {
+                count += recurseFileCollection(testSourceDirectories, testOutputDirectories)
             }
-            if (extension.failOnViolations && count != 0) {
+            if (getFailOnViolations().get() && count != 0) {
                 throw new GradleException("Found $count violations")
             }
         } catch (IOException ioe) {
@@ -171,7 +222,7 @@ class ModernizerTask extends AbstractModernizerTask {
         } else {
             InputStream is = this.getClass().getClassLoader().getResourceAsStream(exclusionsFilePath)
             if (is == null) {
-                throw new GradleException("Could not find exclusion file: $extension.exclusionsFile")
+                throw new GradleException("Could not find exclusion file: $exclusionsFilePath")
             }
 
             return is
@@ -182,7 +233,7 @@ class ModernizerTask extends AbstractModernizerTask {
         try (InputStream is = openExclusionsInputStream(exclusionsFilePath)) {
             return StreamUtils.readAllLines(is)
         } catch (IOException ioe) {
-            throw new GradleScriptException("Error reading exclusion file: $extension.exclusionsFile", ioe)
+            throw new GradleScriptException("Error reading exclusion file: $exclusionsFilePath", ioe)
         }
     }
 
@@ -279,18 +330,19 @@ class ModernizerTask extends AbstractModernizerTask {
 
     private emitViolation(String name, occurrence) {
         def message = "$name:${occurrence.lineNumber}: ${occurrence.violation.comment}"
-        if ("error" == extension.violationLogLevel) {
+        def violationLogLevel = getViolationLogLevel().get()
+        if ("error" == violationLogLevel) {
             log.error(message)
-        } else if ("trace" == extension.violationLogLevel) {
+        } else if ("trace" == violationLogLevel) {
             log.trace(message)
-        } else if ("warn" == extension.violationLogLevel) {
+        } else if ("warn" == violationLogLevel) {
             log.warn(message)
-        } else if ("info" == extension.violationLogLevel) {
+        } else if ("info" == violationLogLevel) {
             log.info(message)
-        } else if ("debug" == extension.violationLogLevel) {
+        } else if ("debug" == violationLogLevel) {
             log.debug(message)
         } else {
-            throw new IllegalStateException("unexpected log level, was: " + extension.violationLogLevel)
+            throw new IllegalStateException("unexpected log level, was: $violationLogLevel")
         }
     }
 }

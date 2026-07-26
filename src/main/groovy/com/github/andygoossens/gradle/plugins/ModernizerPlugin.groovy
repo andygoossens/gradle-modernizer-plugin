@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Andy Goossens
+ * Copyright 2016-2026 Andy Goossens
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaBasePlugin
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.TaskProvider 
+import org.gradle.api.tasks.TaskProvider
 
 class ModernizerPlugin implements Plugin<Project> {
 
@@ -36,13 +36,11 @@ class ModernizerPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         project.getPluginManager().apply(JavaPlugin.class)
-        
+
         ModernizerPluginExtension extension = createExtension(project)
         Configuration configuration = configureConfiguration(project, extension)
 
-        extension.classpath = configuration
-
-        configureAbstractModernizerTask(project, configuration, extension)
+        configureAbstractModernizerTask(project, configuration)
         createTask(project, extension)
     }
 
@@ -55,7 +53,7 @@ class ModernizerPlugin implements Plugin<Project> {
             // avoid CVE warning from upstream dependency. see issue #1
             c.exclude([group: "org.codehaus.plexus", module: "plexus-utils"])
             c.defaultDependencies(d ->
-                d.add(project.dependencies.create("org.gaul:modernizer-maven-plugin:${extension.getToolVersion()}")))
+                d.add(project.dependencies.create("org.gaul:modernizer-maven-plugin:${extension.getToolVersion().get()}")))
         })
     }
 
@@ -88,23 +86,41 @@ class ModernizerPlugin implements Plugin<Project> {
         return extension
     }
 
-    private static void configureAbstractModernizerTask(Project project, Configuration configuration,
-                                                        ModernizerPluginExtension extension) {
-        ModernizerThreadContextClassLoader modernizerClassLoader = new ModernizerThreadContextClassLoader(extension)
+    private static void configureAbstractModernizerTask(Project project, Configuration configuration) {
+        ModernizerThreadContextClassLoader modernizerClassLoader = new ModernizerThreadContextClassLoader()
         project.tasks.withType(AbstractModernizerTask).configureEach {
             group = "Verification"
             description = "Detects use of legacy APIs which modern Java versions supersede."
             threadContextClassLoader = modernizerClassLoader
-            classpath = configuration
+            classpath.from(configuration)
         }
     }
 
     private static void createTask(Project project, ModernizerPluginExtension extension) {
         TaskProvider<ModernizerTask> taskProvider = project.tasks.register(TASK_NAME, ModernizerTask, task -> {
-            task.extension = extension
+            task.toolVersion.set(extension.toolVersion)
+            task.javaVersion.set(extension.javaVersion)
+            task.failOnViolations.set(extension.failOnViolations)
+            task.includeTestClasses.set(extension.includeTestClasses)
+            task.violationsFile.set(extension.violationsFile)
+            task.violationsFiles.set(extension.violationsFiles)
+            task.exclusionsFile.set(extension.exclusionsFile)
+            task.violationLogLevel.set(extension.violationLogLevel)
+            task.ignoreGeneratedClasses.set(extension.ignoreGeneratedClasses)
+            task.exclusions.set(extension.exclusions)
+            task.exclusionPatterns.set(extension.exclusionPatterns)
+            task.ignorePackages.set(extension.ignorePackages)
+            task.ignoreClassNamePatterns.set(extension.ignoreClassNamePatterns)
+            task.skip.set(extension.skip)
+
+            task.mainSourceDirectories.from(extension.mainSourceDirectories)
+            task.mainOutputDirectories.from(extension.mainOutputDirectories)
+            task.testSourceDirectories.from(extension.testSourceDirectories)
+            task.testOutputDirectories.from(extension.testOutputDirectories)
+            
             task.dependsOn(JavaPlugin.CLASSES_TASK_NAME)
 
-            if (extension.includeTestClasses) {
+            if (extension.includeTestClasses.get()) {
                 task.dependsOn(JavaPlugin.TEST_CLASSES_TASK_NAME)
             }
         })

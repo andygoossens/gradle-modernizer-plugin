@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Andy Goossens
+ * Copyright 2016-2026 Andy Goossens
  * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,8 @@ package com.github.andygoossens.gradle.plugins
 
 import com.github.andygoossens.gradle.plugins.utils.ThreadContextClassLoader
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.FileCollection
-import org.gradle.api.tasks.InputFiles
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
@@ -29,9 +29,9 @@ abstract class AbstractModernizerTask extends DefaultTask {
     /**
      * Classpath for modernizer-maven-plugin.
      */
-    @InputFiles
+    @Classpath
     @Optional
-    FileCollection classpath
+    abstract ConfigurableFileCollection getClasspath()
 
     @Internal
     ThreadContextClassLoader threadContextClassLoader

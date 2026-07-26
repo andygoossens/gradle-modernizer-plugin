@@ -1,4 +1,5 @@
 /*
+ * Copyright 2016-2026 Andy Goossens
  * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,22 +16,14 @@
  */
 package com.github.andygoossens.gradle.plugins.utils
 
-import com.github.andygoossens.gradle.plugins.ModernizerPluginExtension
-
 class ModernizerThreadContextClassLoader implements ThreadContextClassLoader {
-
-    private ModernizerPluginExtension modernizerPluginExtension
-
-    public ModernizerThreadContextClassLoader(ModernizerPluginExtension modernizerPluginExtension) {
-        this.modernizerPluginExtension = modernizerPluginExtension
-    }
 
     @Override
     void withClasspath(Set<File> classpath, Closure closure) {
         ClassLoader originalClassLoader = getClass().classLoader
 
         try {
-            Thread.currentThread().contextClassLoader = createClassLoader(classpath ?: modernizerPluginExtension.classpath?.files)
+            Thread.currentThread().contextClassLoader = createClassLoader(classpath ?: [] as Set<File>)
             closure.resolveStrategy = Closure.DELEGATE_FIRST
             closure.delegate = this
             closure()
