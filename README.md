@@ -37,9 +37,9 @@ To use the plugin, include in your build script.
 plugins {
     // Option A: When your root project has a SourceSet
     // e.g. the root project is applying the java/groovy/kotlin plugin as well 
-    id "com.github.andygoossens.modernizer" version "1.14.0"
+    id "com.github.andygoossens.modernizer" version "1.15.0"
     // Option B: When your root project does not have a SourceSet
-    id "com.github.andygoossens.modernizer" version "1.14.0" apply false
+    id "com.github.andygoossens.modernizer" version "1.15.0" apply false
 }
 
 repositories {
@@ -78,9 +78,9 @@ subprojects {
 plugins {
     // Option A: When your root project has a SourceSet
     // e.g., the root project is applying the java/groovy/kotlin plugin as well 
-    id("com.github.andygoossens.modernizer") version "1.14.0"
+    id("com.github.andygoossens.modernizer") version "1.15.0"
     // Option B: When your root project does not have a SourceSet
-    id("com.github.andygoossens.modernizer") version "1.14.0" apply false
+    id("com.github.andygoossens.modernizer") version "1.15.0" apply false
 }
 
 repositories {
@@ -349,7 +349,7 @@ Add the following dependency to your Gradle build script if you do not want to
 create this annotation yourself:
 
 ```groovy
-implementation "org.gaul:modernizer-maven-annotations:3.4.0"
+implementation "org.gaul:modernizer-maven-annotations:3.5.0"
 ```
 
 Modernizer matches the annotation by simple name, so any `@SuppressModernizer`
@@ -382,6 +382,7 @@ The table below describes how they relate to each other.
 | 1.12.0                   | 3.2.0                   |
 | 1.13.0                   | 3.3.0                   |
 | 1.14.0                   | 3.4.0                   |
+| 1.15.0                   | 3.5.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
 Specify the desired version in the `toolVersion` extension property.
