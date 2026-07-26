@@ -17,6 +17,8 @@
 package com.github.andygoossens.gradle.plugins
 
 import org.gradle.api.file.FileCollection
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 
@@ -39,7 +41,7 @@ class ModernizerPluginExtension {
      * 1.2 but not when targeting Java 1.1.
      */
     @Input
-    String javaVersion = null
+    final Property<String> javaVersion
 
     /** Fail task if Modernizer detects any violations. */
     @Input
@@ -143,14 +145,15 @@ class ModernizerPluginExtension {
     FileCollection testSourceDirectories
     FileCollection testOutputDirectories
     
-    ModernizerPluginExtension(FileCollection mainSourceDirectories, FileCollection mainOutputDirectories,
+    ModernizerPluginExtension(ObjectFactory objects,
+                              FileCollection mainSourceDirectories, FileCollection mainOutputDirectories,
                               FileCollection testSourceDirectories, FileCollection testOutputDirectories,
-                              String javaVersion, String toolVersion) {
+                              String toolVersion) {
         this.mainSourceDirectories = mainSourceDirectories
         this.mainOutputDirectories = mainOutputDirectories
         this.testSourceDirectories = testSourceDirectories
         this.testOutputDirectories = testOutputDirectories
-        this.javaVersion = javaVersion
+        this.javaVersion = objects.property(String)
         this.toolVersion = toolVersion
     }
 }

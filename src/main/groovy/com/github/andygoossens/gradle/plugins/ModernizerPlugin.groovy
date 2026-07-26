@@ -61,7 +61,6 @@ class ModernizerPlugin implements Plugin<Project> {
 
     private static ModernizerPluginExtension createExtension(Project project) {
         JavaPluginExtension javaPluginExtension = project.getExtensions().getByType(JavaPluginExtension.class)
-        String javaVersion = javaPluginExtension.targetCompatibility?.toString()
 
         SourceSet mainSourceSet = javaPluginExtension.getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME)
         FileCollection mainSourceDirectories = mainSourceSet.allSource.sourceDirectories
@@ -70,11 +69,23 @@ class ModernizerPlugin implements Plugin<Project> {
         SourceSet testSourceSet = javaPluginExtension.getSourceSets().getByName(SourceSet.TEST_SOURCE_SET_NAME)
         FileCollection testSourceDirectories = testSourceSet.allSource.sourceDirectories
         FileCollection testOutputDirectories = testSourceSet.output.classesDirs
-        
-        project.extensions.create(EXTENSION_NAME, ModernizerPluginExtension,
+
+        ModernizerPluginExtension extension = project.extensions.create(EXTENSION_NAME, ModernizerPluginExtension,
             mainSourceDirectories, mainOutputDirectories,
             testSourceDirectories, testOutputDirectories,
-            javaVersion, MODERNIZER_DEFAULT_VERSION)
+            MODERNIZER_DEFAULT_VERSION)
+
+        // LAZY CONVENTION BINDING
+        extension.javaVersion.convention(project.provider(() -> {
+            // Check toolchain first (Modern Gradle), then fall back to targetCompatibility
+            if (javaPluginExtension.toolchain.languageVersion.isPresent()) {
+                return javaPluginExtension.toolchain.languageVersion.get().toString()
+            }
+            
+            return javaPluginExtension.targetCompatibility?.toString()
+        }))
+        
+        return extension
     }
 
     private static void configureAbstractModernizerTask(Project project, Configuration configuration,

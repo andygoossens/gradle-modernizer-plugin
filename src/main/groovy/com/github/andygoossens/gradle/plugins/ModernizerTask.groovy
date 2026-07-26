@@ -115,7 +115,7 @@ class ModernizerTask extends AbstractModernizerTask {
             }
         }
 
-        modernizer = modernizerClass.newInstance(extension.javaVersion, allViolations, allExclusions,
+        modernizer = modernizerClass.newInstance(extension.javaVersion.get(), allViolations, allExclusions,
                 allExclusionPatterns, extension.ignorePackages, ignoreClassNames, allIgnoreClassNamePatterns,
                 extension.ignoreGeneratedClasses)
 
