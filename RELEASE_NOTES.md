@@ -1,6 +1,7 @@
 ### Next version
 
 * Fix detection of Java version
+* Support for Modernizer Maven Plugin 3.5.0
 
 ### Version 1.14.0 (June 6, 2026)
 

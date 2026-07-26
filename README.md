@@ -362,7 +362,7 @@ The Gradle plugin will then pick up the requested version and, if the API is sti
 
 ```groovy
 modernizer {
-    toolVersion = "3.4.0"
+    toolVersion = "3.5.0"
 }
 ```
 
