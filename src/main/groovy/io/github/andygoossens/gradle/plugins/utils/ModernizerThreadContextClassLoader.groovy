@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.andygoossens.gradle.plugins.utils
+package io.github.andygoossens.gradle.plugins.utils
 
 class ModernizerThreadContextClassLoader implements ThreadContextClassLoader {
 

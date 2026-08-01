@@ -9,7 +9,7 @@ apply from: "$rootDir/gradle/gradle-plugin-publishing.gradle"
 // 1) local Maven repository: publishToMavenLocal
 // 2) Gradle Plugins Portal: publishPlugins
 
-group = 'com.github.andygoossens'
+group = 'io.github.andygoossens'
 version = '1.15.1-SNAPSHOT'
 
 dependencies {

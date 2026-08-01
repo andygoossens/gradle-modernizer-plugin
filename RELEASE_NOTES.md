@@ -1,6 +1,7 @@
 ### Next version
 
 * Support Gradle's configuration cache
+* Move package name and group id from com.github to io.github
 
 ### Version 1.15.0 (July 26, 2026)
 

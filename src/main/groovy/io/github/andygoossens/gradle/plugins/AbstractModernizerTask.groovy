@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.andygoossens.gradle.plugins
+package io.github.andygoossens.gradle.plugins
 
-import com.github.andygoossens.gradle.plugins.utils.ThreadContextClassLoader
 import groovy.transform.CompileStatic
+import io.github.andygoossens.gradle.plugins.utils.ThreadContextClassLoader
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.tasks.Classpath
