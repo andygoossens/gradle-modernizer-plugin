@@ -21,7 +21,9 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
+import org.gradle.api.resources.TextResource
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 
 @CompileStatic
@@ -50,40 +52,32 @@ abstract class ModernizerPluginExtension {
     abstract Property<Boolean> getIncludeTestClasses()
 
     /**
-     * User-specified violation file. Also disables standard violation checks.
-     * Can point to files from classpath using an absolute path, e.g.:
-     *
-     * classpath:/modernizer.xml
-     *
-     * for the default violations file.
+     * User-specified resource with violations.
+     * If specified, ignores all default violations.
      */
-    @Input
-    abstract Property<String> getViolationsFile()
+    @Nested
+    @Optional
+    abstract Property<TextResource> getViolationsFile()
 
     /**
-     * User-specified violation files. The violations loaded from
-     * violationsFiles override the ones specified in violationsFile (or the
-     * default violations file if no violationsFile is given). Violations from
-     * the latter files override violations from the former files.
-     *
-     * Can point to files from classpath using an absolute path, e.g.:
-     *
-     * classpath:/modernizer.xml
-     *
-     * for the default violations file.
+     * User-specified resources with violations.
+     * Overrides violations from resources specified in
+     * {@link #getViolationsFile()}.
+     * Violations from the later resources override violations from earlier
+     * resources.
      */
-    @Input
-    abstract ListProperty<String> getViolationsFiles()
+    @Nested
+    abstract ListProperty<TextResource> getViolationsFiles()
 
     /**
      * Disables user-specified violations. This is a text file with one
      * exclusion per line in the javap format:
      *
-     * java/lang/String.getBytes:(Ljava/lang/String;)[B.
+     * java/lang/String.getBytes:(Ljava/lang/String;)[B
      */
-    @Input
+    @Nested
     @Optional
-    abstract Property<String> getExclusionsFile()
+    abstract Property<TextResource> getExclusionsFile()
 
     /**
      * Log level to emit violations at, e.g., error, warn, info, debug, trace.
@@ -155,7 +149,6 @@ abstract class ModernizerPluginExtension {
         this.getToolVersion().convention(toolVersion)
         this.getFailOnViolations().convention(false)
         this.getIncludeTestClasses().convention(false)
-        this.getViolationsFile().convention("classpath:/modernizer.xml")
         this.getViolationLogLevel().convention("warn")
         this.getIgnoreGeneratedClasses().convention(true)
         this.getSkip().convention(false)

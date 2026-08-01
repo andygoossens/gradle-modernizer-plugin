@@ -27,6 +27,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
+import org.gradle.api.resources.TextResource
 import org.gradle.api.tasks.*
 import org.xml.sax.SAXException
 
@@ -38,13 +39,10 @@ import java.util.function.Function
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
-import static java.lang.String.format
-
 @Slf4j
 @CompileStatic
 abstract class ModernizerTask extends AbstractModernizerTask {
 
-    private static final String CLASSPATH_PREFIX = "classpath:"
     private static final String MODERNIZER_CLASS = "org.gaul.modernizer_maven_plugin.Modernizer"
     private static final String SUPPRESS_DETECTOR_CLASS = "org.gaul.modernizer_maven_plugin.SuppressModernizerAnnotationDetector"
     private static final String GENERATOR_DETECTOR_CLASS = "org.gaul.modernizer_maven_plugin.SuppressGeneratedAnnotationDetector"
@@ -73,13 +71,14 @@ abstract class ModernizerTask extends AbstractModernizerTask {
     abstract Property<Boolean> getFailOnViolations()
     @Input
     abstract Property<Boolean> getIncludeTestClasses()
-    @Input
-    abstract Property<String> getViolationsFile()
-    @Input
-    abstract ListProperty<String> getViolationsFiles()
-    @Input
+    @Nested
     @Optional
-    abstract Property<String> getExclusionsFile()
+    abstract Property<TextResource> getViolationsFile()
+    @Nested
+    abstract ListProperty<TextResource> getViolationsFiles()
+    @Nested
+    @Optional
+    abstract Property<TextResource> getExclusionsFile()
     @Input
     abstract Property<String> getViolationLogLevel()
     @Input
@@ -122,16 +121,15 @@ abstract class ModernizerTask extends AbstractModernizerTask {
 
         Class modernizerClass = threadContextClassLoader.loadClass(MODERNIZER_CLASS)
 
-        Map<String, Collection<? /*Violation*/>> allViolations = parseViolations(modernizerClass, getViolationsFile().get())
-        for (String violationsFilePath : getViolationsFiles().get()) {
-            allViolations.putAll(parseViolations(modernizerClass, violationsFilePath))
+        Map<String, Collection<? /*Violation*/>> allViolations =
+            parseViolations(modernizerClass, resolveViolationsStream(modernizerClass))
+        for (TextResource resource : getViolationsFiles().get()) {
+            allViolations.putAll(parseViolations(modernizerClass, resource.asFile().newInputStream()))
         }
 
         Set<String> allExclusions = new HashSet<String>()
         allExclusions.addAll(getExclusions().get())
-        if (getExclusionsFile().isPresent()) {
-            allExclusions.addAll(readExclusionsFile(getExclusionsFile().get()))
-        }
+        allExclusions.addAll(readExclusions())
 
         Set<Pattern> allExclusionPatterns = new HashSet<Pattern>()
         for (String pattern : getExclusionPatterns().get()) {
@@ -202,9 +200,18 @@ abstract class ModernizerTask extends AbstractModernizerTask {
     // touches types loaded from the user-configured modernizer version.
 
     @CompileDynamic
-    private static Map<String, Collection<? /*Violation*/>> parseViolations(Class modernizerClass, String violationsFilePath) {
-        try (InputStream is = openViolationsInputStream(violationsFilePath, modernizerClass)) {
-            return modernizerClass.parseFromXml(is) as Map<String, Collection<?>>
+    private InputStream resolveViolationsStream(Class modernizerClass) {
+        if (getViolationsFile().isPresent()) {
+            return getViolationsFile().get().asFile().newInputStream()
+        }
+        
+        return modernizerClass.getResourceAsStream("/modernizer.xml")
+    }
+    
+    @CompileDynamic
+    private static Map<String, Collection<? /*Violation*/>> parseViolations(Class modernizerClass, InputStream is) {
+        try (InputStream stream = is) {
+            return modernizerClass.parseFromXml(stream) as Map<String, Collection<?>>
         } catch (IOException ioe) {
             throw new GradleScriptException("Error reading violation data", ioe)
         } catch (ParserConfigurationException pce) {
@@ -243,45 +250,15 @@ abstract class ModernizerTask extends AbstractModernizerTask {
     // Fully statically-checked from here on.
     // ------------------------------------------------------------------------
 
-    private static InputStream openViolationsInputStream(String violationsFilePath, Class modernizerClass) {
-        if (violationsFilePath.startsWith(CLASSPATH_PREFIX)) {
-            String classpath = violationsFilePath.substring(CLASSPATH_PREFIX.length())
-            if (!classpath.startsWith("/")) {
-                throw new IllegalArgumentException(format(
-                    "Only absolute classpath references are allowed, got [%s]",
-                    classpath))
-            }
-
-            return modernizerClass.getResourceAsStream(classpath)
-        } else {
-            File file = new File(violationsFilePath)
-            try {
-                return new FileInputStream(file)
-            } catch (FileNotFoundException fnfe) {
-                throw new GradleScriptException("Error opening violation file: $file", fnfe)
-            }
+    private Collection<String> readExclusions() {
+        if (!getExclusionsFile().isPresent()) {
+            return []
         }
-    }
-
-    private InputStream openExclusionsInputStream(String exclusionsFilePath) {
-        File file = new File(exclusionsFilePath)
-        if (file.exists()) {
-            return new FileInputStream(exclusionsFilePath)
-        } else {
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream(exclusionsFilePath)
-            if (is == null) {
-                throw new GradleException("Could not find exclusion file: $exclusionsFilePath")
-            }
-
-            return is
-        }
-    }
-
-    private Collection<String> readExclusionsFile(String exclusionsFilePath) {
-        try (InputStream is = openExclusionsInputStream(exclusionsFilePath)) {
+        
+        try (InputStream is = getExclusionsFile().get().asFile().newInputStream()) {
             return StreamUtils.readAllLines(is)
         } catch (IOException ioe) {
-            throw new GradleScriptException("Error reading exclusion file: $exclusionsFilePath", ioe)
+            throw new GradleScriptException("Error reading exclusion file", ioe)
         }
     }
 

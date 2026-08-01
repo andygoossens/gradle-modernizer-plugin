@@ -1,6 +1,6 @@
 # Gradle Modernizer Plugin
 
-![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.andygoossens.modernizer)
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.andygoossens.modernizer)](https://plugins.gradle.org/plugin/com.github.andygoossens.modernizer)
 
 Gradle Modernizer Plugin detects uses of legacy APIs which modern Java versions
 supersede.
@@ -27,7 +27,7 @@ so that the same functionality is now available in Gradle builds.
 
 ## Usage
 
-To use the plugin, include in your build script.
+To use the plugin, include the following in your build script:
 
 <details>
   <summary>Groovy DSL</summary>
@@ -49,6 +49,7 @@ repositories {
 // Apply the plugin
 
 // Option 1: Apply the plugin in each project where you want to use it
+// pick ONE of the two styles below
 // Gradle's old way:
 apply plugin: "com.github.andygoossens.modernizer"
 // Gradle's new way:
@@ -120,22 +121,22 @@ whenever it is deemed necessary.
 
 ### Extension properties
 
-| Property name           | Type     | Default value                  | Description                                                                                                                                                                     |
-|-------------------------|----------|--------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| toolVersion             | String   | See table below                | Version of modernizer-maven-plugin that will be used.                                                                                                                           |
-| javaVersion             | String   | ${project.targetCompatibility} | Target Java version. Decides which violations will apply.                                                                                                                       |
-| failOnViolations        | boolean  | false                          | Fail build when a violation has been detected.                                                                                                                                  |
-| includeTestClasses      | boolean  | false                          | Whether test classes will be searched for violations.                                                                                                                           |
-| violationLogLevel       | String   | warn                           | Logs violations at this level. Possible values: error, warn, info, debug, trace                                                                                                 |
-| violationsFile          | String   | null                           | User-specified violation file. Overrides standard violation checks.                                                                                                             |
-| violationsFiles         | String[] | []                             | User-specified violation files. Overrides `violationsFile` and standard checks.                                                                                                 |
-| exclusionsFile          | String   | null                           | Disables user-specified violations. See format description below.                                                                                                               |
-| exclusions              | String[] | []                             | Violations to disable. See format description below.                                                                                                                            |
-| exclusionPatterns       | String[] | []                             | Violation patterns to disable. See format description below.                                                                                                                    |
-| ignorePackages          | String[] | []                             | Package prefixes to ignore. See format description below.                                                                                                                       |
-| ignoreClassNamePatterns | String[] | []                             | Full qualified class names (incl. package) to ignore. See format description below.                                                                                             |
-| ignoreGeneratedClasses  | boolean  | true                           | Whether classes annotated with an annotation whose retention policy is <code>runtime</code> or <code>class</code> and whose simple name is exactly "Generated" will be ignored. |
-| skip                    | boolean  | false                          | Whether task should be skipped.                                                                                                                                                 |
+| Property name                                       | Type               | Default value          | Description                                                                                                                                                                     |
+|-----------------------------------------------------|--------------------|------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| toolVersion                                         | String             | See table below        | Version of modernizer-maven-plugin that will be used.                                                                                                                           |
+| javaVersion                                         | String             | Project's Java version | Target Java version. Decides which violations will apply. Defaults to the toolchain language version if configured, else `project.targetCompatibility`.                         |
+| failOnViolations                                    | boolean            | false                  | Fail build when a violation has been detected.                                                                                                                                  |
+| includeTestClasses                                  | boolean            | false                  | Whether test classes will be searched for violations.                                                                                                                           |
+| violationLogLevel                                   | String             | warn                   | Logs violations at this level. Possible values: error, warn, info, debug, trace                                                                                                 |
+| [violationsFile](#violationsfile)                   | TextResource       |                        | User-specified violation resource.                                                                                                                                              |
+| [violationsFiles](#violationsfiles)                 | List<TextResource> | []                     | User-specified violation resources.                                                                                                                                             |
+| [exclusionsFile](#exclusionsfile)                   | TextResource       |                        | User-specified exclusion resource. See format description below.                                                                                                                |
+| [exclusions](#exclusions)                           | Set<String>        | []                     | Violations to disable. See format description below.                                                                                                                            |
+| [exclusionPatterns](#exclusionpatterns)             | Set<String>        | []                     | Violation patterns to disable. See format description below.                                                                                                                    |
+| [ignorePackages](#ignorepackages)                   | Set<String>        | []                     | Package prefixes to ignore. See format description below.                                                                                                                       |
+| [ignoreClassNamePatterns](#ignoreclassnamepatterns) | Set<String>        | []                     | Full qualified class names (incl. package) to ignore. See format description below.                                                                                             |
+| [ignoreGeneratedClasses](#ignoregeneratedclasses)   | boolean            | true                   | Whether classes annotated with an annotation whose retention policy is <code>runtime</code> or <code>class</code> and whose simple name is exactly "Generated" will be ignored. |
+| skip                                                | boolean            | false                  | Whether task should be skipped.                                                                                                                                                 |
 
 #### Usage example
 
@@ -149,18 +150,111 @@ modernizer {
 Note that you can only configure the plugin in projects where the plugin has been applied.
 See "Usage" section above.
 
-#### Formats
+#### Properties
+
+##### violationsFile
+
+This is a text resource that contains violations.
+The XML content needs to be formatted according to
+[Modernizer Maven Plugin's rules](https://github.com/gaul/modernizer-maven-plugin#custom-violations).
+
+Any specified value will ignore all bundled violations.
+
+Content example:
+```xml
+<?xml version="1.0"?>
+<modernizer>
+  <violation>
+    <name>com/google/common/base/Function</name>
+    <version>1.8</version>
+    <comment>Prefer java.util.function.Function</comment>
+  </violation>
+</modernizer>
+```
+
+<details>
+  <summary>Groovy DSL example</summary>
+
+```groovy
+modernizer {
+    violationsFile = resources.text.fromFile("src/main/resources/violations.xml")
+}
+```
+</details>
+
+<details>
+  <summary>Kotlin DSL example</summary>
+
+```kotlin
+modernizer {
+    violationsFile = resources.text.fromFile("src/main/resources/violations.xml")
+}
+```
+</details>
+
+##### violationsFiles
+
+A list of text resources containing violations.
+Each entry's XML content needs to be formatted according to
+[Modernizer Maven Plugin's rules](https://github.com/gaul/modernizer-maven-plugin#custom-violations).
+
+When violations share the same `<name>` value, then a later definition will override earlier one.
+Bundled violations or violations from `violationsFile` are the earliest definitions. 
+
+<details>
+  <summary>Groovy DSL example</summary>
+
+```groovy
+modernizer {
+    violationsFiles = [
+        resources.text.fromFile("src/main/resources/violations.xml")
+    ]
+}
+```
+</details>
+
+<details>
+  <summary>Kotlin DSL example</summary>
+
+```kotlin
+modernizer {
+    violationsFiles = listOf(
+        resources.text.fromFile("src/main/resources/violations.xml")
+    )
+}
+```
+</details>
 
 ##### exclusionsFile
 
-This is a text file with one exclusion per line in the javap format.
+This is a text resource with one exclusion per line in the javap format.
 
-Example:
+Content example:
 ```
 java/lang/String.getBytes:(Ljava/lang/String;)[B
 com/google/common/base/Function
 sun/misc/BASE64Decoder.decodeBuffer:(Ljava/lang/String;)[B
 ```
+
+<details>
+  <summary>Groovy DSL example</summary>
+
+```groovy
+modernizer {
+    exclusionsFile = resources.text.fromFile("src/main/resources/exclusions.xml")
+}
+```
+</details>
+
+<details>
+  <summary>Kotlin DSL example</summary>
+
+```kotlin
+modernizer {
+    exclusionsFile = resources.text.fromFile("src/main/resources/exclusions.xml")
+}
+```
+</details>
 
 ##### exclusions
 
@@ -193,7 +287,6 @@ modernizer {
 }
 ```
 </details>
-
 
 ##### exclusionPatterns
 
@@ -254,7 +347,6 @@ modernizer {
 }
 ```
 </details>
-
 
 ##### ignoreClassNamePatterns
 
