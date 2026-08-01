@@ -16,6 +16,7 @@
 package com.github.andygoossens.gradle.plugins
 
 import com.github.andygoossens.gradle.plugins.utils.ModernizerThreadContextClassLoader
+import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -26,6 +27,7 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskProvider
 
+@CompileStatic
 class ModernizerPlugin implements Plugin<Project> {
 
     public static final String MODERNIZER_CONFIGURATION_NAME = 'modernizer'
@@ -46,7 +48,7 @@ class ModernizerPlugin implements Plugin<Project> {
 
     private static Configuration configureConfiguration(Project project,
                                                         ModernizerPluginExtension extension) {
-        project.getConfigurations().create(MODERNIZER_CONFIGURATION_NAME, c -> {
+        project.getConfigurations().create(MODERNIZER_CONFIGURATION_NAME, { Configuration c ->
             c.setVisible(false)
             c.setTransitive(true)
             c.setDescription("The Modernizer libraries to be used for this project.")
@@ -88,12 +90,12 @@ class ModernizerPlugin implements Plugin<Project> {
 
     private static void configureAbstractModernizerTask(Project project, Configuration configuration) {
         ModernizerThreadContextClassLoader modernizerClassLoader = new ModernizerThreadContextClassLoader()
-        project.tasks.withType(AbstractModernizerTask).configureEach {
-            group = "Verification"
-            description = "Detects use of legacy APIs which modern Java versions supersede."
-            threadContextClassLoader = modernizerClassLoader
-            classpath.from(configuration)
-        }
+        project.tasks.withType(AbstractModernizerTask).configureEach({ AbstractModernizerTask task ->
+            task.group = "Verification"
+            task.description = "Detects use of legacy APIs which modern Java versions supersede."
+            task.threadContextClassLoader = modernizerClassLoader
+            task.classpath.from(configuration)
+        })
     }
 
     private static void createTask(Project project, ModernizerPluginExtension extension) {

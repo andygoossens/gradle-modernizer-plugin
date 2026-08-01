@@ -18,7 +18,7 @@ package com.github.andygoossens.gradle.plugins
 
 import com.github.andygoossens.gradle.plugins.utils.StreamUtils
 import groovy.util.logging.Slf4j
-import org.gaul.modernizer_maven_plugin.Violation
+import org.gaul.modernizer_maven_plugin.Modernizer
 import org.gradle.api.GradleException
 import org.gradle.api.GradleScriptException
 import org.gradle.api.file.ConfigurableFileCollection
@@ -26,11 +26,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.*
 import org.xml.sax.SAXException
 
 import javax.xml.parsers.ParserConfigurationException
@@ -107,7 +103,7 @@ abstract class ModernizerTask extends AbstractModernizerTask {
 
         def modernizerClass = threadContextClassLoader.loadClass(MODERNIZER_CLASS)
 
-        Map<String, Violation> allViolations = parseViolations(modernizerClass, getViolationsFile().get())
+        Map<String, Collection<? /*Violation*/>> allViolations = parseViolations(modernizerClass, getViolationsFile().get())
         for (String violationsFilePath : getViolationsFiles().get()) {
             allViolations.putAll(parseViolations(modernizerClass, violationsFilePath))
         }
@@ -203,7 +199,7 @@ abstract class ModernizerTask extends AbstractModernizerTask {
         }
     }
 
-    private static Map<String, Violation> parseViolations(Class modernizerClass, String violationsFilePath) {
+    private static Map<String, Collection<? /*Violation*/>> parseViolations(Class<Modernizer> modernizerClass, String violationsFilePath) {
         try (InputStream is = openViolationsInputStream(violationsFilePath, modernizerClass)) {
             return modernizerClass.parseFromXml(is)
         } catch (IOException ioe) {
@@ -273,7 +269,7 @@ abstract class ModernizerTask extends AbstractModernizerTask {
         if (outputFile.getPath().endsWith(".class")) {
             InputStream is = new FileInputStream(outputFile)
             try {
-                Collection occurrences = modernizer.check(is)
+                Collection<? /*ViolationOccurrence*/> occurrences = modernizer.check(is)
                 for (def occurrence : occurrences) {
                     String sourceFile = findSourceFile(sourceDirectories, outputDirectory, outputFile)
                     emitViolation(sourceFile, occurrence)
@@ -328,7 +324,7 @@ abstract class ModernizerTask extends AbstractModernizerTask {
         ]
     }
 
-    private emitViolation(String name, occurrence) {
+    private emitViolation(String name, /*ViolationOccurrence*/ occurrence) {
         def message = "$name:${occurrence.lineNumber}: ${occurrence.violation.comment}"
         def violationLogLevel = getViolationLogLevel().get()
         if ("error" == violationLogLevel) {

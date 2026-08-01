@@ -16,6 +16,7 @@
  */
 package com.github.andygoossens.gradle.plugins
 
+import groovy.transform.CompileStatic
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -23,6 +24,7 @@ import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 
+@CompileStatic
 abstract class ModernizerPluginExtension {
 
     /**

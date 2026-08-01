@@ -17,6 +17,7 @@
 package com.github.andygoossens.gradle.plugins
 
 import com.github.andygoossens.gradle.plugins.utils.ThreadContextClassLoader
+import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.tasks.Classpath
@@ -24,6 +25,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 
+@CompileStatic
 abstract class AbstractModernizerTask extends DefaultTask {
 
     /**
