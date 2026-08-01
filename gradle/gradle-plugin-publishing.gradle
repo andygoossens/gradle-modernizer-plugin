@@ -8,6 +8,12 @@ gradlePlugin {
             displayName = 'Gradle Modernizer plugin'
             description = 'Detects use of legacy APIs which modern Java versions supersede.'
             tags.set(['java', 'static analysis', 'code quality', 'verification', 'legacy apis'])
+
+            compatibility {
+                features {
+                    configurationCache = true
+                }
+            }
         }
         
         // Avoid using these for new projects.
