@@ -17,8 +17,9 @@
 package com.github.andygoossens.gradle.plugins
 
 import com.github.andygoossens.gradle.plugins.utils.StreamUtils
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.gaul.modernizer_maven_plugin.Modernizer
 import org.gradle.api.GradleException
 import org.gradle.api.GradleScriptException
 import org.gradle.api.file.ConfigurableFileCollection
@@ -33,18 +34,36 @@ import javax.xml.parsers.ParserConfigurationException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.function.Function
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
 import static java.lang.String.format
 
 @Slf4j
+@CompileStatic
 abstract class ModernizerTask extends AbstractModernizerTask {
 
     private static final String CLASSPATH_PREFIX = "classpath:"
     private static final String MODERNIZER_CLASS = "org.gaul.modernizer_maven_plugin.Modernizer"
     private static final String SUPPRESS_DETECTOR_CLASS = "org.gaul.modernizer_maven_plugin.SuppressModernizerAnnotationDetector"
     private static final String GENERATOR_DETECTOR_CLASS = "org.gaul.modernizer_maven_plugin.SuppressGeneratedAnnotationDetector"
+
+    /**
+     * Plain data carrier for a single violation occurrence, extracted from the
+     * reflectively-loaded ViolationOccurrence instance inside
+     * {@link #createModernizerCheck(java.lang.Class, java.lang.String, java.util.Map, java.util.Set, java.util.Set, java.util.Set, java.util.Set, java.util.Set, boolean)},
+     * so the rest of this class never has to touch that type directly.
+     */
+    private static class ViolationRecord {
+        final int lineNumber
+        final String comment
+
+        ViolationRecord(int lineNumber, String comment) {
+            this.lineNumber = lineNumber
+            this.comment = comment
+        }
+    }
 
     @Input
     abstract Property<String> getToolVersion()
@@ -92,7 +111,7 @@ abstract class ModernizerTask extends AbstractModernizerTask {
     @PathSensitive(PathSensitivity.RELATIVE)
     abstract ConfigurableFileCollection getTestOutputDirectories()
 
-    private def modernizer
+    private Function<InputStream, List<ViolationRecord>> modernizerCheck
 
     @Override
     void run(Object closure) {
@@ -101,7 +120,7 @@ abstract class ModernizerTask extends AbstractModernizerTask {
             return
         }
 
-        def modernizerClass = threadContextClassLoader.loadClass(MODERNIZER_CLASS)
+        Class modernizerClass = threadContextClassLoader.loadClass(MODERNIZER_CLASS)
 
         Map<String, Collection<? /*Violation*/>> allViolations = parseViolations(modernizerClass, getViolationsFile().get())
         for (String violationsFilePath : getViolationsFiles().get()) {
@@ -124,28 +143,27 @@ abstract class ModernizerTask extends AbstractModernizerTask {
             }
         }
 
-        def suppressDetectorClass = threadContextClassLoader.loadClass(SUPPRESS_DETECTOR_CLASS)
-        def suppressDetectMethod = suppressDetectorClass.getDeclaredMethod("detect", Path.class)
-        def generatedDetectorClass = threadContextClassLoader.loadClass(GENERATOR_DETECTOR_CLASS)
-        def generatedDetectMethod = generatedDetectorClass.getDeclaredMethod("detect", Path.class)
+        Function<Path, Set<String>> suppressDetector =
+            bindDetector(threadContextClassLoader.loadClass(SUPPRESS_DETECTOR_CLASS))
+        Function<Path, Set<String>> generatedDetector =
+            bindDetector(threadContextClassLoader.loadClass(GENERATOR_DETECTOR_CLASS))
+
         Set<String> ignoreClassNames = new HashSet<String>()
         try {
-            def detectionFileCollection = mainOutputDirectories
+            FileCollection detectionFileCollection = getMainOutputDirectories()
             if (getIncludeTestClasses().get()) {
-                detectionFileCollection += testOutputDirectories
+                detectionFileCollection = detectionFileCollection + getTestOutputDirectories()
             }
 
             def detectionFiles = detectionFileCollection.files
             for (File detectionFile : detectionFiles) {
                 // Ignore classes annotated with org.gaul.modernizer_maven_annotations.SuppressModernize
-                Path detectionPath = detectionFile.toPath() 
-                Set<String> suppressedClassNames = suppressDetectMethod.invoke(null, detectionPath) as Set<String>
-                ignoreClassNames.addAll(suppressedClassNames)
-                
+                Path detectionPath = detectionFile.toPath()
+                ignoreClassNames.addAll(suppressDetector.apply(detectionPath))
+
                 if (getIgnoreGeneratedClasses().get()) {
                     // Ignore classes annotated with Generated (does not matter from which package)
-                    Set<String> generatedClassNames = generatedDetectMethod.invoke(null, detectionPath) as Set<String>
-                    ignoreClassNames.addAll(generatedClassNames)
+                    ignoreClassNames.addAll(generatedDetector.apply(detectionPath))
                 }
             }
         } catch (IOException e) {
@@ -162,14 +180,14 @@ abstract class ModernizerTask extends AbstractModernizerTask {
             }
         }
 
-        modernizer = modernizerClass.newInstance(getJavaVersion().get(), allViolations, allExclusions,
+        modernizerCheck = createModernizerCheck(modernizerClass, getJavaVersion().get(), allViolations, allExclusions,
                 allExclusionPatterns, getIgnorePackages().get(), ignoreClassNames, allIgnoreClassNamePatterns,
                 getIgnoreGeneratedClasses().get())
 
         try {
-            long count = recurseFileCollection(mainSourceDirectories, mainOutputDirectories)
+            long count = recurseFileCollection(getMainSourceDirectories(), getMainOutputDirectories())
             if (getIncludeTestClasses().get()) {
-                count += recurseFileCollection(testSourceDirectories, testOutputDirectories)
+                count += recurseFileCollection(getTestSourceDirectories(), getTestOutputDirectories())
             }
             if (getFailOnViolations().get() && count != 0) {
                 throw new GradleException("Found $count violations")
@@ -179,6 +197,52 @@ abstract class ModernizerTask extends AbstractModernizerTask {
         }
     }
 
+    // ------------------------------------------------------------------------
+    // The only dynamic seams in this class: everything below this point
+    // touches types loaded from the user-configured modernizer version.
+
+    @CompileDynamic
+    private static Map<String, Collection<? /*Violation*/>> parseViolations(Class modernizerClass, String violationsFilePath) {
+        try (InputStream is = openViolationsInputStream(violationsFilePath, modernizerClass)) {
+            return modernizerClass.parseFromXml(is) as Map<String, Collection<?>>
+        } catch (IOException ioe) {
+            throw new GradleScriptException("Error reading violation data", ioe)
+        } catch (ParserConfigurationException pce) {
+            throw new GradleScriptException("Error parsing violation data", pce)
+        } catch (SAXException saxe) {
+            throw new GradleScriptException("Error parsing violation data", saxe)
+        }
+    }
+
+    @CompileDynamic
+    private static Function<Path, Set<String>> bindDetector(Class detectorClass) {
+        def method = detectorClass.getDeclaredMethod("detect", Path)
+        return { Path p -> method.invoke(null, p) as Set<String> } as Function<Path, Set<String>>
+    }
+
+    @CompileDynamic
+    private static Function<InputStream, List<ViolationRecord>> createModernizerCheck(
+        Class modernizerClass, String javaVersion,
+        Map<String, Collection<?>> violations, Set<String> exclusions, Set<Pattern> exclusionPatterns,
+        Set<String> ignorePackages, Set<String> ignoreClassNames, Set<Pattern> ignoreClassNamePatterns,
+        boolean ignoreGeneratedClasses) {
+        def instance = modernizerClass.newInstance(javaVersion, violations, exclusions, exclusionPatterns,
+            ignorePackages, ignoreClassNames, ignoreClassNamePatterns, ignoreGeneratedClasses)
+
+        return { InputStream is ->
+            Collection violationOccurrences = instance.check(is)
+            violationOccurrences.collect { violationOccurrence ->
+                new ViolationRecord(
+                    violationOccurrence.lineNumber as int,
+                    violationOccurrence.violation.comment as String
+                )
+            } as List<ViolationRecord>
+        } as Function<InputStream, List<ViolationRecord>>
+    }
+
+    // Fully statically-checked from here on.
+    // ------------------------------------------------------------------------
+
     private static InputStream openViolationsInputStream(String violationsFilePath, Class modernizerClass) {
         if (violationsFilePath.startsWith(CLASSPATH_PREFIX)) {
             String classpath = violationsFilePath.substring(CLASSPATH_PREFIX.length())
@@ -187,7 +251,7 @@ abstract class ModernizerTask extends AbstractModernizerTask {
                     "Only absolute classpath references are allowed, got [%s]",
                     classpath))
             }
-            
+
             return modernizerClass.getResourceAsStream(classpath)
         } else {
             File file = new File(violationsFilePath)
@@ -196,18 +260,6 @@ abstract class ModernizerTask extends AbstractModernizerTask {
             } catch (FileNotFoundException fnfe) {
                 throw new GradleScriptException("Error opening violation file: $file", fnfe)
             }
-        }
-    }
-
-    private static Map<String, Collection<? /*Violation*/>> parseViolations(Class<Modernizer> modernizerClass, String violationsFilePath) {
-        try (InputStream is = openViolationsInputStream(violationsFilePath, modernizerClass)) {
-            return modernizerClass.parseFromXml(is)
-        } catch (IOException ioe) {
-            throw new GradleScriptException("Error reading violation data", ioe)
-        } catch (ParserConfigurationException pce) {
-            throw new GradleScriptException("Error parsing violation data", pce)
-        } catch (SAXException saxe) {
-            throw new GradleScriptException("Error parsing violation data", saxe)
         }
     }
 
@@ -269,8 +321,8 @@ abstract class ModernizerTask extends AbstractModernizerTask {
         if (outputFile.getPath().endsWith(".class")) {
             InputStream is = new FileInputStream(outputFile)
             try {
-                Collection<? /*ViolationOccurrence*/> occurrences = modernizer.check(is)
-                for (def occurrence : occurrences) {
+                List<ViolationRecord> occurrences = modernizerCheck.apply(is)
+                for (ViolationRecord occurrence : occurrences) {
                     String sourceFile = findSourceFile(sourceDirectories, outputDirectory, outputFile)
                     emitViolation(sourceFile, occurrence)
 
@@ -296,24 +348,24 @@ abstract class ModernizerTask extends AbstractModernizerTask {
             for (String possibleSourceFile : possibleSourceFiles) {
                 Path possibleSourcePath = Paths.get(sourceDir.absolutePath, possibleSourceFile)
                 if (Files.exists(possibleSourcePath)) {
-                    return possibleSourcePath
+                    return possibleSourcePath.toString()
                 }
             }
         }
 
         // We tried our best, but we could not find the source file. Return the class file.
-        name
+        return name
     }
 
     private static List<String> getPossibleSourceFiles(String classFileName) {
         // Cut off the extension
-        int i = classFileName.lastIndexOf('.');
-        classFileName = classFileName.substring(0, i);
+        int i = classFileName.lastIndexOf('.')
+        classFileName = classFileName.substring(0, i)
 
         // Cut off inner classes
-        int j = classFileName.indexOf('$');
+        int j = classFileName.indexOf('$')
         if (j >= 0) {
-            classFileName = classFileName.substring(0, j);
+            classFileName = classFileName.substring(0, j)
         }
 
         // Return in order of likelihood
@@ -324,9 +376,9 @@ abstract class ModernizerTask extends AbstractModernizerTask {
         ]
     }
 
-    private emitViolation(String name, /*ViolationOccurrence*/ occurrence) {
-        def message = "$name:${occurrence.lineNumber}: ${occurrence.violation.comment}"
-        def violationLogLevel = getViolationLogLevel().get()
+    private void emitViolation(String name, ViolationRecord occurrence) {
+        String message = "$name:${occurrence.lineNumber}: ${occurrence.comment}"
+        String violationLogLevel = getViolationLogLevel().get()
         if ("error" == violationLogLevel) {
             log.error(message)
         } else if ("trace" == violationLogLevel) {
