@@ -5,6 +5,7 @@
 * Introduce 'io.github.andygoossens.modernizer' plugin id. GitHub, Maven Central and Gradle want that everyone migrates from `com.github` to `io.github`.
 * Show warning when someone uses the old plugin in
 * Build plugin with Gradle 8.14.4
+* Instead of forcing the Java plugin, react lazily to it being applied
 
 ### Version 1.15.0 (July 26, 2026)
 

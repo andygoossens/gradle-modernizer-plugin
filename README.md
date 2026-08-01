@@ -35,6 +35,8 @@ To use the plugin, include the following in your build script:
 ```groovy
 // You need to do this only once
 plugins {
+    // The Java plugin should already have been applied
+    id 'java'
     // Option A: When your root project has a SourceSet
     // e.g. the root project is applying the java/groovy/kotlin plugin as well 
     id "com.github.andygoossens.modernizer" version "1.15.0"
@@ -77,6 +79,8 @@ subprojects {
 ```kotlin
 // You need to do this only once
 plugins {
+    // The Java plugin should already have been applied
+    java
     // Option A: When your root project has a SourceSet
     // e.g., the root project is applying the java/groovy/kotlin plugin as well 
     id("com.github.andygoossens.modernizer") version "1.15.0"
@@ -110,7 +114,18 @@ subprojects {
 If you are still using the old plugin id `com.github.andygoossens.gradle-modernizer-plugin` then
 please switch to `com.github.andygoossens.modernizer` instead.
 
-If you want to call the `modernizer` task directly:
+Note that Gradle's Java plugin should already have been applied in the 
+same Gradle project!
+If it is missing, or it is getting applied too late, the Modernizer plugin
+won't be active.
+If you are using one of these plugins, you should be fine:
+* `java`
+* `java-library`
+* `application`
+* `groovy`
+* `org.jetbrains.kotlin.jvm`
+
+If you want to execute the `modernizer` task directly:
 ```bash
 ./gradlew modernizer
 ```

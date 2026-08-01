@@ -37,13 +37,13 @@ class ModernizerPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.getPluginManager().apply(JavaPlugin.class)
+        project.getPluginManager().withPlugin("java") {
+            ModernizerPluginExtension extension = createExtension(project)
+            Configuration configuration = configureConfiguration(project, extension)
 
-        ModernizerPluginExtension extension = createExtension(project)
-        Configuration configuration = configureConfiguration(project, extension)
-
-        configureAbstractModernizerTask(project, configuration)
-        createTask(project, extension)
+            configureAbstractModernizerTask(project, configuration)
+            createTask(project, extension)
+        }
     }
 
     private static Configuration configureConfiguration(Project project,
@@ -127,10 +127,8 @@ class ModernizerPlugin implements Plugin<Project> {
             }
         })
 
-        project.plugins.withType(JavaBasePlugin.class).configureEach(p ->
-            project.tasks.named(JavaBasePlugin.CHECK_TASK_NAME, t ->
-                t.dependsOn(taskProvider)
-            )
+        project.tasks.named(JavaBasePlugin.CHECK_TASK_NAME, t ->
+            t.dependsOn(taskProvider)
         )
     }
 }
