@@ -18,7 +18,7 @@ package io.github.andygoossens.gradle.plugins.utils
 import java.nio.charset.Charset
 
 class StreamUtils {
-    
+
     private static final Charset UTF_8 = Charset.forName("UTF-8")
 
     static def closeQuietly(Closeable closeable) {

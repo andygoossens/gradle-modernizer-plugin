@@ -65,46 +65,63 @@ abstract class ModernizerTask extends AbstractModernizerTask {
 
     @Input
     abstract Property<String> getToolVersion()
+
     @Input
     abstract Property<String> getJavaVersion()
+
     @Input
     abstract Property<Boolean> getFailOnViolations()
+
     @Input
     abstract Property<Boolean> getIncludeTestClasses()
+
     @Nested
     @Optional
     abstract Property<TextResource> getViolationsFile()
+
     @Nested
     abstract ListProperty<TextResource> getViolationsFiles()
+
     @Nested
     @Optional
     abstract Property<TextResource> getExclusionsFile()
+
     @Input
     abstract Property<String> getViolationLogLevel()
+
     @Input
     abstract Property<Boolean> getIgnoreGeneratedClasses()
+
     @Input
     abstract SetProperty<String> getExclusions()
+
     @Input
     abstract SetProperty<String> getExclusionPatterns()
+
     @Input
     abstract SetProperty<String> getIgnorePackages()
+
     @Input
     abstract SetProperty<String> getIgnoreClassNamePatterns()
+
     @Input
     abstract Property<Boolean> getSkip()
+
     @InputFiles
     @Optional
     @PathSensitive(PathSensitivity.RELATIVE)
     abstract ConfigurableFileCollection getMainSourceDirectories()
+
     @InputFiles
     @Optional
     @PathSensitive(PathSensitivity.RELATIVE)
     abstract ConfigurableFileCollection getMainOutputDirectories()
+
     @InputFiles
     @Optional
     @PathSensitive(PathSensitivity.RELATIVE)
     abstract ConfigurableFileCollection getTestSourceDirectories()
+
     @InputFiles
     @Optional
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -136,8 +153,7 @@ abstract class ModernizerTask extends AbstractModernizerTask {
             try {
                 allExclusionPatterns.add(Pattern.compile(pattern))
             } catch (PatternSyntaxException pse) {
-                throw new GradleScriptException(
-                        "Invalid exclusion pattern", pse)
+                throw new GradleScriptException("Invalid exclusion pattern", pse)
             }
         }
 
@@ -173,14 +189,13 @@ abstract class ModernizerTask extends AbstractModernizerTask {
             try {
                 allIgnoreClassNamePatterns.add(Pattern.compile(pattern))
             } catch (PatternSyntaxException pse) {
-                throw new GradleScriptException(
-                        "Invalid ignore class name pattern", pse)
+                throw new GradleScriptException("Invalid ignore class name pattern", pse)
             }
         }
 
         modernizerCheck = createModernizerCheck(modernizerClass, getJavaVersion().get(), allViolations, allExclusions,
-                allExclusionPatterns, getIgnorePackages().get(), ignoreClassNames, allIgnoreClassNamePatterns,
-                getIgnoreGeneratedClasses().get())
+            allExclusionPatterns, getIgnorePackages().get(), ignoreClassNames, allIgnoreClassNamePatterns,
+            getIgnoreGeneratedClasses().get())
 
         try {
             long count = recurseFileCollection(getMainSourceDirectories(), getMainOutputDirectories())
@@ -204,10 +219,10 @@ abstract class ModernizerTask extends AbstractModernizerTask {
         if (getViolationsFile().isPresent()) {
             return getViolationsFile().get().asFile().newInputStream()
         }
-        
+
         return modernizerClass.getResourceAsStream("/modernizer.xml")
     }
-    
+
     @CompileDynamic
     private static Map<String, Collection<? /*Violation*/>> parseViolations(Class modernizerClass, InputStream is) {
         try (InputStream stream = is) {
@@ -254,7 +269,7 @@ abstract class ModernizerTask extends AbstractModernizerTask {
         if (!getExclusionsFile().isPresent()) {
             return []
         }
-        
+
         try (InputStream is = getExclusionsFile().get().asFile().newInputStream()) {
             return StreamUtils.readAllLines(is)
         } catch (IOException ioe) {
@@ -347,9 +362,9 @@ abstract class ModernizerTask extends AbstractModernizerTask {
 
         // Return in order of likelihood
         return [
-                classFileName + ".java",
-                classFileName + ".kt",
-                classFileName + ".groovy",
+            classFileName + ".java",
+            classFileName + ".kt",
+            classFileName + ".groovy",
         ]
     }
 

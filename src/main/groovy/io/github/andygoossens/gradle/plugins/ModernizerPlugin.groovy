@@ -81,10 +81,10 @@ class ModernizerPlugin implements Plugin<Project> {
             if (javaPluginExtension.toolchain.languageVersion.isPresent()) {
                 return javaPluginExtension.toolchain.languageVersion.get().toString()
             }
-            
+
             return javaPluginExtension.targetCompatibility?.toString()
         }))
-        
+
         return extension
     }
 
@@ -119,7 +119,7 @@ class ModernizerPlugin implements Plugin<Project> {
             task.mainOutputDirectories.from(extension.mainOutputDirectories)
             task.testSourceDirectories.from(extension.testSourceDirectories)
             task.testOutputDirectories.from(extension.testOutputDirectories)
-            
+
             task.dependsOn(JavaPlugin.CLASSES_TASK_NAME)
 
             if (extension.includeTestClasses.get()) {

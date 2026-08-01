@@ -117,7 +117,7 @@ abstract class ModernizerPluginExtension {
      */
     @Input
     abstract SetProperty<String> getIgnorePackages()
-    
+
     /**
      * Full qualified class names (incl. package) to ignore, specified using
      * &lt;ignoreClassNamePattern&gt; child elements. Each exclusion should be
@@ -137,7 +137,7 @@ abstract class ModernizerPluginExtension {
     FileCollection mainOutputDirectories
     FileCollection testSourceDirectories
     FileCollection testOutputDirectories
-    
+
     ModernizerPluginExtension(FileCollection mainSourceDirectories,
                               FileCollection mainOutputDirectories, FileCollection testSourceDirectories,
                               FileCollection testOutputDirectories, String toolVersion) {
