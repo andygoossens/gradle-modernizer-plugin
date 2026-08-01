@@ -481,6 +481,33 @@ Specify the desired version in the `toolVersion` extension property.
 Pay attention: This might break when there is an API change!
 
 
+## Migrating from 1.x to 2.x
+
+There were a few breaking changes between versions 1.x and 2.x to improve
+support for [Gradle's configuration cache](https://docs.gradle.org/current/userguide/configuration_cache.html) and have proper tracking of changed
+content.
+This improves build speed and leads to fewer mistakes.
+
+The plugin now needs to be configured with [Gradle's properties](https://docs.gradle.org/current/userguide/properties_providers.html).
+Most properties simply moved from the raw type to `Property<...>`,
+but there were a few exceptions:
+* `violationsFile` went from `String` to `Property<TextResource>` 
+* `violationsFiles` went from `List<String>` to `ListProperty<TextResource>` 
+* `exclusionsFile` went from `String` to `Property<TextResource>` 
+
+Example:
+```kotlin
+modernizer {
+    // old
+    // (file content changes were not noticed) 
+    violationsFile = "src/main/resources/violations.xml"
+    
+    // new
+    // (file content changes are detected)
+    violationsFile = resources.text.fromFile("src/main/resources/violations.xml")
+}
+```
+
 ## FAQ
 
 ### I found an undetected case of legacy API. Can you add a new violation rule?
