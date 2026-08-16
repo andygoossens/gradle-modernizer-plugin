@@ -10,7 +10,7 @@ apply from: "$rootDir/gradle/gradle-plugin-publishing.gradle"
 // 2) Gradle Plugins Portal: publishPlugins
 
 group = 'io.github.andygoossens'
-version = '2.0.0'
+version = '2.0.1-SNAPSHOT'
 
 dependencies {
     compileOnly 'org.gaul:modernizer-maven-plugin:3.5.0'
