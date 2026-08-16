@@ -1,6 +1,6 @@
 # Gradle Modernizer Plugin
 
-[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.andygoossens.modernizer)](https://plugins.gradle.org/plugin/com.github.andygoossens.modernizer)
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/io.github.andygoossens.modernizer)](https://plugins.gradle.org/plugin/io.github.andygoossens.modernizer)
 
 Gradle Modernizer Plugin detects uses of legacy APIs which modern Java versions
 supersede.
@@ -39,36 +39,18 @@ plugins {
     id 'java'
     // Option A: When your root project has a SourceSet
     // e.g. the root project is applying the java/groovy/kotlin plugin as well 
-    id "com.github.andygoossens.modernizer" version "1.15.0"
+    id "io.github.andygoossens.modernizer" version "2.0.0"
     // Option B: When your root project does not have a SourceSet
-    id "com.github.andygoossens.modernizer" version "1.15.0" apply false
+    id "io.github.andygoossens.modernizer" version "2.0.0" apply false
 }
 
 repositories {
     mavenCentral()
 }
 
-// Apply the plugin
-
-// Option 1: Apply the plugin in each project where you want to use it
-// pick ONE of the two styles below
-// Gradle's old way:
-apply plugin: "com.github.andygoossens.modernizer"
-// Gradle's new way:
+// Apply the plugin in each project where you want to use it
 plugins {
-    id "com.github.andygoossens.modernizer"
-}
-
-// Option 2: Apply the plugin in all projects (even in the root project)
-//           Preferably used with option A (= not mentioning 'apply false')
-allprojects {
-    apply plugin: "com.github.andygoossens.modernizer"
-}
-
-// Option 3: Apply the plugin in all subprojects (but not the root project)
-//           Preferably used with option B (= mentioning 'apply false')
-subprojects {
-    apply plugin: "com.github.andygoossens.modernizer"
+    id "io.github.andygoossens.modernizer"
 }
 ```
 </details>
@@ -83,36 +65,26 @@ plugins {
     java
     // Option A: When your root project has a SourceSet
     // e.g., the root project is applying the java/groovy/kotlin plugin as well 
-    id("com.github.andygoossens.modernizer") version "1.15.0"
+    id("io.github.andygoossens.modernizer") version "2.0.0"
     // Option B: When your root project does not have a SourceSet
-    id("com.github.andygoossens.modernizer") version "1.15.0" apply false
+    id("io.github.andygoossens.modernizer") version "2.0.0" apply false
 }
 
 repositories {
     mavenCentral()
 }
 
-// Apply the plugin
-
-// Option 1: Apply the plugin in each project where you want to use it
-plugins.apply("com.github.andygoossens.modernizer")
-
-// Option 2: Apply the plugin in all projects (even in the root project)
-//           Preferably used with option A (= not mentioning 'apply false')
-allprojects {
-    plugins.apply("com.github.andygoossens.modernizer")
-}
-
-// Option 3: Apply the plugin in all subprojects (but not the root project)
-//           Preferably used with option B (= mentioning 'apply false')
-subprojects {
-    plugins.apply("com.github.andygoossens.modernizer")
+// Apply the plugin in each project where you want to use it
+plugins {
+  id("io.github.andygoossens.modernizer")
 }
 ```
 </details>
 
-If you are still using the old plugin id `com.github.andygoossens.gradle-modernizer-plugin` then
-please switch to `com.github.andygoossens.modernizer` instead.
+If you are still using the old plugin ids
+`com.github.andygoossens.gradle-modernizer-plugin` or
+`com.github.andygoossens.modernizer`, then please switch to
+`io.github.andygoossens.modernizer` instead.
 
 Note that Gradle's Java plugin should already have been applied in the 
 same Gradle project!
@@ -490,6 +462,7 @@ The table below describes how they relate to each other.
 | 1.13.0                   | 3.3.0                   |
 | 1.14.0                   | 3.4.0                   |
 | 1.15.0                   | 3.5.0                   |
+| 2.0.0                    | 3.5.0                   |
 
 Note that you can override the default version of Modernizer Maven Plugin which will be used.
 Specify the desired version in the `toolVersion` extension property.

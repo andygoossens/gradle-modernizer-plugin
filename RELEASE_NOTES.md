@@ -1,5 +1,7 @@
 ### Next version
 
+### Version 2.0.0 (August 16, 2026)
+
 * Support Gradle's configuration cache
 * Move package name and group id from `com.github` to `io.github`
 * Introduce 'io.github.andygoossens.modernizer' plugin id. GitHub, Maven Central and Gradle want that everyone migrates from `com.github` to `io.github`.
