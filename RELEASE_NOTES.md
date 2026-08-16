@@ -3,9 +3,10 @@
 * Support Gradle's configuration cache
 * Move package name and group id from `com.github` to `io.github`
 * Introduce 'io.github.andygoossens.modernizer' plugin id. GitHub, Maven Central and Gradle want that everyone migrates from `com.github` to `io.github`.
-* Show warning when someone uses the old plugin in
+* Show warning when someone uses the old plugin ids
 * Build plugin with Gradle 8.14.4
 * Instead of forcing the Java plugin, react lazily to it being applied
+* Participate in Gradle's up-to-date checking and build cache
 
 ### Version 1.15.0 (July 26, 2026)
 

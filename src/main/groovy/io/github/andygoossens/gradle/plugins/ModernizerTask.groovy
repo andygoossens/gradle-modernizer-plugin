@@ -16,14 +16,15 @@
  */
 package io.github.andygoossens.gradle.plugins
 
-import io.github.andygoossens.gradle.plugins.utils.StreamUtils
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import io.github.andygoossens.gradle.plugins.utils.StreamUtils
 import org.gradle.api.GradleException
 import org.gradle.api.GradleScriptException
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
@@ -41,6 +42,7 @@ import java.util.regex.PatternSyntaxException
 
 @Slf4j
 @CompileStatic
+@CacheableTask
 abstract class ModernizerTask extends AbstractModernizerTask {
 
     private static final String MODERNIZER_CLASS = "org.gaul.modernizer_maven_plugin.Modernizer"
@@ -127,12 +129,20 @@ abstract class ModernizerTask extends AbstractModernizerTask {
     @PathSensitive(PathSensitivity.RELATIVE)
     abstract ConfigurableFileCollection getTestOutputDirectories()
 
+    @OutputFile
+    abstract RegularFileProperty getReportFile()
+
     private Function<InputStream, List<ViolationRecord>> modernizerCheck
 
     @Override
     void run(Object closure) {
         if (getSkip().get()) {
             log.info('Skipping modernizer execution')
+            getReportFile().get().asFile.text =
+                """Modernizer marker file
+Finished at: ${System.currentTimeMillis()}
+Skipped execution
+"""
             return
         }
 
@@ -202,6 +212,13 @@ abstract class ModernizerTask extends AbstractModernizerTask {
             if (getIncludeTestClasses().get()) {
                 count += recurseFileCollection(getTestSourceDirectories(), getTestOutputDirectories())
             }
+
+            getReportFile().get().asFile.text =
+                """Modernizer marker file
+Finished at: ${System.currentTimeMillis()}
+Violations: $count
+"""
+            
             if (getFailOnViolations().get() && count != 0) {
                 throw new GradleException("Found $count violations")
             }

@@ -120,6 +120,8 @@ class ModernizerPlugin implements Plugin<Project> {
             task.testSourceDirectories.from(extension.testSourceDirectories)
             task.testOutputDirectories.from(extension.testOutputDirectories)
 
+            task.reportFile.convention(project.layout.buildDirectory.file("reports/modernizer/report.txt"))
+
             task.dependsOn(JavaPlugin.CLASSES_TASK_NAME)
 
             if (extension.includeTestClasses.get()) {

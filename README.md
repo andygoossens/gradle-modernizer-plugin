@@ -523,6 +523,15 @@ modernizer {
 }
 ```
 
+Since version 2.x, the `modernizer` task participates in Gradle's
+up-to-date checking and build cache, so it will not re-execute if none of its
+inputs (configuration, source code, ...) changed since the last run.
+
+To force a rerun regardless, execute:
+```bash
+./gradlew modernizer --rerun-tasks
+```
+
 ## FAQ
 
 ### I found an undetected case of legacy API. Can you add a new violation rule?
