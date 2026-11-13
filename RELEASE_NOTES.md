@@ -1,5 +1,7 @@
 ### Next version
 
+* Do not use Configuration.setVisible(), it is deprecated in Gradle 9
+
 ### Version 2.0.0 (August 16, 2026)
 
 * Support Gradle's configuration cache

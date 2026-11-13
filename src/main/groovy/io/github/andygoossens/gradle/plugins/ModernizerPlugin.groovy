@@ -15,8 +15,8 @@
  */
 package io.github.andygoossens.gradle.plugins
 
-import io.github.andygoossens.gradle.plugins.utils.ModernizerThreadContextClassLoader
 import groovy.transform.CompileStatic
+import io.github.andygoossens.gradle.plugins.utils.ModernizerThreadContextClassLoader
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -49,8 +49,7 @@ class ModernizerPlugin implements Plugin<Project> {
     private static Configuration configureConfiguration(Project project,
                                                         ModernizerPluginExtension extension) {
         project.getConfigurations().create(MODERNIZER_CONFIGURATION_NAME, { Configuration c ->
-            c.setVisible(false)
-            c.setTransitive(true)
+            c.setCanBeConsumed(false)
             c.setDescription("The Modernizer libraries to be used for this project.")
             // avoid CVE warning from upstream dependency. see issue #1
             c.exclude([group: "org.codehaus.plexus", module: "plexus-utils"])
