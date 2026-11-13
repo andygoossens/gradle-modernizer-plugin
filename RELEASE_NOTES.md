@@ -1,5 +1,9 @@
 ### Next version
 
+* Stop publishing with plugin ids
+  `com.github.andygoossens.gradle-modernizer-plugin` and
+  `com.github.andygoossens.modernizer`.
+  Gradle rejects those because they do not match group id `io.github`.
 * Do not use Configuration.setVisible(), it is deprecated in Gradle 9
 
 ### Version 2.0.0 (August 16, 2026)

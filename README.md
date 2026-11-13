@@ -317,7 +317,7 @@ Specifying `foo.bar` subsequently ignores `foo.bar.*`, `foo.bar.baz.*` and so on
 ```groovy
 modernizer {
     ignorePackages = [
-        'com.github.andygoossens',
+        'io.github.andygoossens',
     ]
 }
 ```
@@ -329,7 +329,7 @@ modernizer {
 ```kotlin
 modernizer {
     ignorePackages = setOf(
-        "com.github.andygoossens",
+        "io.github.andygoossens",
     )
 }
 ```
